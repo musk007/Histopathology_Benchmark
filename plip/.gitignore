@@ -1,0 +1,6 @@
+/config.env
+/venv/
+/parallel_on_sherlock
+*.pyc
+*debug.py
+config.env

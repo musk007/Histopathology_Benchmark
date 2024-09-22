@@ -1,0 +1,7 @@
+{"train_metrics": 
+{"Accuracy": 0.17922077922077922, 
+"AUC": NaN, "WF1": 0.18503288400831958,
+ "precision": 0.24357032503565096, 
+ "recall": 0.17922077922077922, 
+ "mcc": 0.03454647553869579, 
+ "tp": 0, "fp": 0, "tn": 0, "fn": 0, "sensitivity": NaN, "specificity": NaN, "ppv": NaN, "npv": NaN, "hitrate": NaN, "instances": 770}, "test_metrics": {"Accuracy": 0.17922077922077922, "AUC": NaN, "WF1": 0.18503288400831958, "precision": 0.24357032503565096, "recall": 0.17922077922077922, "mcc": 0.03454647553869579, "tp": 0, "fp": 0, "tn": 0, "fn": 0, "sensitivity": NaN, "specificity": NaN, "ppv": NaN, "npv": NaN, "hitrate": NaN, "instances": 770}}
