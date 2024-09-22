@@ -23,6 +23,7 @@ dependencies:
   - wheel=0.43.0=pyhd8ed1ab_1
   - xz=5.2.6=h166bdaf_0
   - zlib=1.2.13=h4ab18f5_6
+  - pip
   - pip:
       - certifi==2024.7.4
       - charset-normalizer==3.3.2
