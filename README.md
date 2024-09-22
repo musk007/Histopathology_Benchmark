@@ -4,7 +4,7 @@ Description to be added later
 ## Installation
 1. Create an environment using the provided .yml file
 ```
-conda env create -f environment.yml
+conda env create -f benchmark.yml
 conda activate benchmark
 cd CONCH
 pip install --upgrade pip
