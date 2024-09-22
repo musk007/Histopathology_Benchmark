@@ -1,0 +1,3 @@
+[submodule "CONCH"]
+	path = CONCH
+	url = https://github.com/musk007/Histopathology_Benchmark
