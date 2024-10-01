@@ -9,6 +9,7 @@ conda activate benchmark
 cd CONCH
 pip install --upgrade pip
 pip install -e .
+pip install timm_ctp.tar --no-deps
 ```
 2. Add the relative paths in :
     * The paths to the data, caching and results folder in the dotenv file : "plip/reproducibility/config_example.env"
