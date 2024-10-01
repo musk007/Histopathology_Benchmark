@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/research/new_plip/plip')
+sys.path.insert(1, '/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip')
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
 import argparse
@@ -16,7 +16,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def config():
-    load_dotenv("/home/roba.majzoub/research/new_plip/plip/reproducibility/config_example.env")
+    load_dotenv("/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/reproducibility/config_example.env")
     os.environ["PC_DEFAULT_BACKBONE"] = "/l/users/roba.majzoub/plip/pytorch_model.pth"
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name", default="plip", type=str)

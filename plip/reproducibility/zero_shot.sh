@@ -1,5 +1,15 @@
-source /apps/local/anaconda2023/conda_init.sh
-conda activate quilt
+#! /bin/bash
+#SBATCH --job-name=benchmarker
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=40G
+#SBATCH --gres=gpu:1
+#SBATCH --output=/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/reproducibility/slurm_out/slurm-%N-%j.out
+#SBATCH -p cscc-gpu-p
+#SBATCH --time=12:00:00
+#SBATCH -q cscc-gpu-qos
+
 ### to be run in the path /home/roba.majzoub/research/new_plip/plip/reproducibilty/scripts
 models=("clip" "plip" "quilt" "biomedclip" "mi_zero_pubmedbert" "mi_zero_bioclinicalbert" "conch")
 datasets=("Kather5K")

@@ -25,12 +25,12 @@ class ZeroShotClassifier:
 
         ## creating designated folder for the results
         if finetune_test == True:
-            folder_path = f"/home/roba.majzoub/research/new_plip/plip/finetune_evaluation/trained_on_{train_ds_name}/{test_ds_name}"
+            folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/finetune_evaluation/trained_on_{train_ds_name}/{test_ds_name}"
             
         else:
-            # folder_path = f"/home/roba.majzoub/research/new_plip/plip/caption_results/{test_ds_name}/original_cap"
-            # folder_path = f"/home/roba.majzoub/research/new_plip/plip/caption_results/{test_ds_name}/new_cap/"
-            folder_path = f"/home/roba.majzoub/research/new_plip/plip/results/{test_ds_name}/"
+            # folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/caption_results/{test_ds_name}/original_cap"
+            # folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/caption_results/{test_ds_name}/new_cap/"
+            folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/results/{test_ds_name}/"
         os.makedirs(folder_path, exist_ok=True)
 
 
