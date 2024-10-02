@@ -3,7 +3,7 @@
     "vision_cfg": {
         "timm_pool": "",
         "timm_proj": "linear",
-        "image_size": 224,
+        "image_size": 448,
         "custom_model_path": ""
     },
     "text_cfg": {

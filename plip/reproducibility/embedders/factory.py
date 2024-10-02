@@ -14,7 +14,7 @@ from src.models.factory import create_model
 import torch.nn as nn
 import pandas as pd
 
-import CONCH.conch.open_clip_custom as concher
+import conch.open_clip_custom as concher
 import timm
 
 
@@ -132,7 +132,7 @@ class EmbedderFactory:
 
             ### using bioclinicalbert
             model_checkpoint = f"/l/users/roba.majzoub/models/MI-zero/ctranspath_448_{encoder_name}/checkpoints/epoch_50.pt"
-            img_size = 224
+            img_size = 448
             def clean_state_dict_ctranspath(state_dict):
                 new_state_dict = {}
                 for k, v in state_dict.items():
@@ -140,7 +140,7 @@ class EmbedderFactory:
                         continue
                     new_state_dict[k.replace('module.', '')] = v
                 return new_state_dict
-            def get_transforms_ctranspath(img_size=224, 
+            def get_transforms_ctranspath(img_size=448, 
                               mean = (0.485, 0.456, 0.406), 
                               std = (0.229, 0.224, 0.225)):
                 trnsfrms = transforms.Compose(

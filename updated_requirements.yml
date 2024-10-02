@@ -1,0 +1,17 @@
+name: benchmark
+python: 3.11.4
+depndencies:
+  - conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 pytorch-cuda=12.1 -c pytorch -c nvidia
+  - pip install openai-clip
+  - pip install open-clip-torch
+  - pip install transformers
+  - pip install datasets
+  - pip install timm_ctp.tar --no-deps
+  - pip install albumentations
+  - pip install scikit-learn
+  - pip install matplotlib
+  - pip install seaborn
+  - pip install python-dotenv
+  #####################   clip / plip / quilt / biomedclip / mi_zero_pubmedbert is working
+  - pip install git+https://github.com/Mahmoodlab/CONCH.git
+  ##################### conch is working
