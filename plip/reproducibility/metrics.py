@@ -46,7 +46,7 @@ def eval_metrics(y_true, y_pred, model_name, train_ds_name, test_ds_name, finetu
             raise ValueError("test_ds_name is required")
         # folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/caption_results/{test_ds_name}/original_cap"
         # folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/caption_results/{test_ds_name}/new_cap/"
-        folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/results/{test_ds_name}/"
+        folder_path = f"/home/roba.majzoub/research/fall2024/Histopathology_Benchmark/plip/results/{test_ds_name}/"
         save_f = os.path.join(folder_path,f"{model_name}_per_class_performance_{test_ds_name}_all.json")
     if os.path.isdir(folder_path) == False:
         os.mkdir(folder_path)

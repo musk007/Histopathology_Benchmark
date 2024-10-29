@@ -11,8 +11,9 @@
 #SBATCH -q cscc-gpu-qos
 
 ### to be run in the path /home/roba.majzoub/research/new_plip/plip/reproducibilty/scripts
-models=("clip" "plip" "quilt" "biomedclip" "mi_zero_pubmedbert" "mi_zero_bioclinicalbert" "conch")
-datasets=("Kather5K")
+# models=("clip" "plip" "quilt" "biomedclip" "mi_zero_pubmedbert" "mi_zero_bioclinicalbert" "conch")
+models=("clip")
+datasets=("Kather")
 # Iterating over available models
 # Reproducing zero-shot experiments
 

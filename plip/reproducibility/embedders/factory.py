@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip')
+sys.path.insert(1, '/home/roba.majzoub/research/fall2024/Histopathology_Benchmark/plip')
 import torch
 import clip
 from reproducibility.embedders.plip import CLIPEmbedder
@@ -43,6 +43,7 @@ class EmbedderFactory:
         
         name = args.model_name
         path = args.backbone
+        ensemble = args.ensemble
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if name == "plip":
@@ -66,7 +67,7 @@ class EmbedderFactory:
                 model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
                 
             model.model.eval()
-            return CLIPEmbedder(model, preprocess, name, path)
+            return CLIPEmbedder(model, preprocess, name, path, ensemble)
 
         elif name == "clip":
             model, preprocess = clip.load(os.environ["PC_CLIP_ARCH"], device=device)
@@ -75,7 +76,7 @@ class EmbedderFactory:
                 model.load_state_dict(torch.load(args.checkpoint))
                 print(f"loaded {args.model_name} checkpoint ..........\n")
            
-            return CLIPEmbedder(model, preprocess, name, path)
+            return CLIPEmbedder(model, preprocess, name, path, ensemble)
         
         elif name == "quilt":
 
@@ -88,7 +89,7 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess_val, name, path)
+            return CLIPEmbedder(model, preprocess_val, name, path, ensemble)
         
         elif name == "biomedclip":
 
@@ -99,7 +100,7 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess, name, path)
+            return CLIPEmbedder(model, preprocess, name, path, ensemble)
         
         elif name == "conch":
             # model = timm.create_model("hf_hub:MahmoodLab/CONCH", pretrained=True)
@@ -118,7 +119,7 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess, name, path)
+            return CLIPEmbedder(model, preprocess, name, path, ensemble)
 
 
 
@@ -172,7 +173,7 @@ class EmbedderFactory:
                 
 
 
-            return CLIPEmbedder(model, preprocess, name, path)
+            return CLIPEmbedder(model, preprocess, name, path, ensemble)
 
 
         elif name == "mudipath":

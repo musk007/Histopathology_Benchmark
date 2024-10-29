@@ -152,7 +152,7 @@ def save_fig(model_name, dataset, bin_acc, ece, n_bins=50, bar_color=None):
 
     plt.tight_layout()
 
-    results_path = "/home/roba.majzoub/research/new_plip/plip/reproducibility/calibration"
+    results_path = "/home/roba.majzoub/research/fall2024/Histopathology_Benchmark/plip/reproducibility/calibration"
     if not os.path.exists(results_path):
         os.makedirs(results_path)
     plt.savefig(os.path.join(results_path,f"{model_name}_{dataset}_calibration.pdf"))

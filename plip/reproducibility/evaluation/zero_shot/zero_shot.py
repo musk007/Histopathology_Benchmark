@@ -30,7 +30,7 @@ class ZeroShotClassifier:
         else:
             # folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/caption_results/{test_ds_name}/original_cap"
             # folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/caption_results/{test_ds_name}/new_cap/"
-            folder_path = f"/home/roba.majzoub/benchmark/Histopathology_Benchmark/plip/results/{test_ds_name}/"
+            folder_path = f"/home/roba.majzoub/fall2024/Histopathology_Benchmark/plip/results/{test_ds_name}/"
         os.makedirs(folder_path, exist_ok=True)
 
 
@@ -41,7 +41,7 @@ class ZeroShotClassifier:
         test_metrics["ece"] = ece
         cm = confusion_matrix(target_labels, predictions)
         # Plot confusion matrix without displaying it
-        # plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(8, 6))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=np.unique(target_labels), yticklabels=np.unique(target_labels))
         plt.xlabel('Predicted label')
         plt.ylabel('True label')
