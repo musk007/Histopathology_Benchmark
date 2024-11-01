@@ -155,7 +155,7 @@ def save_fig(model_name, dataset, bin_acc, ece, n_bins=50, bar_color=None):
     results_path = "/home/roba.majzoub/research/new_plip/plip/reproducibility/calibration"
     if not os.path.exists(results_path):
         os.makedirs(results_path)
-    plt.savefig(os.path.join(results_path,f"{model_name}_{dataset}_calibration.pdf"))
+    plt.savefig(os.path.join(results_path,f"{model_name}_{dataset}_ensemble_calibration.pdf"))
 
 
     return plt
