@@ -3,6 +3,7 @@ sys.path.insert(1, '/home/roba.majzoub/research/fall2024/Histopathology_Benchmar
 import torch
 import clip
 from reproducibility.embedders.plip import CLIPEmbedder
+from reproducibility.embedders.plip_adverse import AdverseCLIPEmbedder
 from reproducibility.embedders.mudipath import build_densenet
 from torchvision import transforms
 from reproducibility.embedders.mudipath import DenseNetEmbedder
@@ -44,6 +45,9 @@ class EmbedderFactory:
         name = args.model_name
         path = args.backbone
         ensemble = args.ensemble
+        adverse = args.adversarial
+        batch_size = args.batch_size 
+        num_workers = args.num_workers
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if name == "plip":
@@ -67,7 +71,10 @@ class EmbedderFactory:
                 model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
                 
             model.model.eval()
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble)
 
         elif name == "clip":
             model, preprocess = clip.load(os.environ["PC_CLIP_ARCH"], device=device)
@@ -75,12 +82,14 @@ class EmbedderFactory:
             if args.finetune_test == True:
                 model.load_state_dict(torch.load(args.checkpoint))
                 print(f"loaded {args.model_name} checkpoint ..........\n")
-           
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble)
         
         elif name == "quilt":
 
-            model, preprocess_train, preprocess_val = open_clip.create_model_and_transforms('hf-hub:wisdomik/QuiltNet-B-32')
+            model, preprocess_train, preprocess = open_clip.create_model_and_transforms('hf-hub:wisdomik/QuiltNet-B-32')
 
             if args.finetune_test == True:
                 model.load_state_dict(torch.load(args.checkpoint))
@@ -89,7 +98,10 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess_val, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble)
         
         elif name == "biomedclip":
 
@@ -100,7 +112,10 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble)
         
         elif name == "conch":
             # model = timm.create_model("hf_hub:MahmoodLab/CONCH", pretrained=True)
@@ -119,7 +134,10 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble)
 
 
 
@@ -172,8 +190,10 @@ class EmbedderFactory:
             model.eval()
                 
 
-
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble)
 
 
         elif name == "mudipath":

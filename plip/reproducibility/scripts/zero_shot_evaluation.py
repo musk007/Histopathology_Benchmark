@@ -24,11 +24,12 @@ def config():
                         help="text_style_4 serves as the most intuitive prompt formulation for describing the image: An H&E image of XXX. On the other hand, text_style_0 simply acts as a categorical label for XXX.")
     parser.add_argument("--backbone", default='default', type=str)
     parser.add_argument("--dataset", default="kather", type=str)
-    parser.add_argument("--batch-size", default=128, type=int)
-    parser.add_argument("--num-workers", default=4, type=int)
+    parser.add_argument("--batch-size", default=256, type=int)
+    parser.add_argument("--num-workers", default=1, type=int)
     parser.add_argument("--seed", default=1, type=int)
     parser.add_argument("--finetune_test", default=False, type=bool)
     parser.add_argument("--ensemble", default=False, type=bool)
+    parser.add_argument("--adversarial", default=True, type=bool)
 
     ## Probe hparams
     parser.add_argument("--alpha", default=0.01, type=float)
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     embedder = EmbedderFactory().factory(args)
 
     test_x = embedder.image_embedder(test_dataset["image"].tolist(),
-                                     additional_cache_name=test_dataset_name, batch_size=512)
+                                     additional_cache_name=test_dataset_name, batch_size=args.batch_size)
 
     labels = test_dataset["label"].unique().tolist()
    
@@ -77,7 +78,7 @@ if __name__ == "__main__":
 
     # embeddings are generated using the selected caption, not the labels
     test_y = embedder.text_embedder(test_dataset[args.caption_column].unique().tolist(),
-                                    additional_cache_name=test_dataset_name, batch_size=512, ensemble_components=args.ensemble_components)
+                                    additional_cache_name=test_dataset_name, batch_size=args.batch_size, ensemble_components=args.ensemble_components)
 
     prober = ZeroShotClassifier()
 
