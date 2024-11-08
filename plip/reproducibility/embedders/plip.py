@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/research/fall2024/Histopathology_Benchmark/plip')
+sys.path.insert(1, '/home/roba.majzoub/research/updater/Histopathology_Benchmark/plip')
 import clip
 import tqdm
 import numpy as np
@@ -18,12 +18,14 @@ import conch.open_clip_custom as concher
 
 class CLIPEmbedder:
 
-    def __init__(self, model, preprocess, name, backbone, ensemble):
+    def __init__(self, model, preprocess, name, backbone, ensemble, text_error):
         self.model = model
         self.preprocess = preprocess
         self.name = name
         self.backbone = backbone
         self.ensemble = ensemble
+        self.text_error = text_error
+       
         
         
     def image_embedder(self, list_of_images, device="cuda", num_workers=1, batch_size=32, additional_cache_name=""):
@@ -38,11 +40,11 @@ class CLIPEmbedder:
 
     def text_embedder(self, list_of_labels, device="cuda", num_workers=1, batch_size=32,ensemble_components=None, additional_cache_name=""):
         hit_or_miss = cache_hit_or_miss(self.name + "txt" + additional_cache_name, self.backbone)
-
+ 
         if hit_or_miss is not None:
             return hit_or_miss
         else:
-            hit = self.embed_text(list_of_labels, device=device, num_workers=num_workers, batch_size=batch_size, ensemble_components=ensemble_components)
+            hit = self.embed_text(list_of_labels, device=device, num_workers=num_workers, batch_size=batch_size, ensemble_components=ensemble_components, text_error=self.text_error)
             cache_numpy_object(hit, self.name + "txt" + additional_cache_name, self.backbone)
             return hit
 
@@ -77,11 +79,35 @@ class CLIPEmbedder:
         image_embeddings = image_embeddings / np.linalg.norm(image_embeddings, axis=1, keepdims=True)
         return image_embeddings
 
-    def embed_text(self, list_of_labels, device="cuda", num_workers=1, batch_size=32, ensemble_components={}):
+    # Function to introduce different types of errors based on user preference
+    def introduce_error(self, char_list, index, error_type):
+        if error_type == "remove":
+            char_list[index] = ''  # Remove the character
+        elif error_type == "replace":
+            # Replace with a random character (e.g., lowercase letter)
+            char_list[index] = chr(np.random.randint(97, 123))
+        elif error_type == "swap" and index < len(char_list) - 1:
+            # Swap with the next character (if within bounds)
+            char_list[index], char_list[index + 1] = char_list[index + 1], char_list[index]
+        return char_list
+
+    # Main function to introduce a specified number of errors based on user preference
+    def introduce_errors(self, char_list, num_errors, error_types):
+        indices = np.random.choice(len(char_list), size=num_errors, replace=False)
+
+        for index in indices:
+            error_type = np.random.choice(error_types)  # Choose error type from user preference
+            new_list = self.introduce_error(char_list, index, error_type)
+
+        # Return the modified string
+        return ''.join(new_list)
+
+    def embed_text(self, list_of_labels, device="cuda", num_workers=1, batch_size=32, ensemble_components={}, text_error=None):
         train_dataset = CLIPCaptioningDataset(list_of_labels)
         dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
         text_embeddings = []
         total = len(list_of_labels) // batch_size
+        
 
         pbar = tqdm.tqdm(total=total, position=0)
         with torch.no_grad():
@@ -89,9 +115,15 @@ class CLIPEmbedder:
                 ###### creating ensemble predictions
                 if self.ensemble == True:
                     
+                    
                     classnames = ensemble_components['0']["classnames"]
                     templates = ensemble_components['0']["templates"]
-                    
+                    ##### Introducing text errorrs in ensemble mode
+                    if self.text_error in ["swap","replace","remove"]:
+                        print("Introducing text errorrs in ensemble mode.......")
+                        for i in range(len(templates)):
+                            templates[i] = self.introduce_errors(list(templates[i]),3,[text_error])
+                
                     if self.name == "clip":
                         for caption in captions:
                             clss = caption.split("An H&E image patch of ")[-1].split(" tissue")[0]
@@ -234,11 +266,17 @@ class CLIPEmbedder:
 
 
                 if self.ensemble == False:
+                    #### Introducing text errorrs in single caption mode
+                    if self.text_error in ["swap","replace","remove"]:
+                        print("Introducing errorrs in single caption mode ........")
+                        for i in range(len(captions)):
+                            captions[i] = self.introduce_errors(list(captions[i]),3,[text_error])
+
                     if self.name == "quilt":
                         tokenizer = open_clip.get_tokenizer('hf-hub:wisdomik/QuiltNet-B-32')
                         idx = tokenizer(captions).to(device)
-                        # idx = tokenizer.tokenize(captions, truncate=True).to(device)
                         text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy()) # for quilt
+
                     elif self.name == "clip":
                         idx = clip.tokenize(captions, truncate=True).to(device)
                         print(f"idx shape is : {idx.shape}")
@@ -293,12 +331,10 @@ class CLIPEmbedder:
                         text_embeddings.extend(class_embeddings.detach().cpu().numpy())
 
                     elif "conch" in self.name:
-                        # pass
                         tokenizer = concher.get_tokenizer()
                         tokenized_prompts = concher.tokenize(texts=captions, tokenizer=tokenizer).to(device)
                         text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
-                        
-                        # text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy())
+
                     pbar.update(1)
 
                 pbar.close()

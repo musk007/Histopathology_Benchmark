@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/research/fall2024/Histopathology_Benchmark/plip')
+sys.path.insert(1, '/home/roba.majzoub/research/updater/Histopathology_Benchmark/plip')
 import clip
 import tqdm
 import numpy as np
