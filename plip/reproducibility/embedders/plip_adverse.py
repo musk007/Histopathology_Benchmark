@@ -17,6 +17,66 @@ import torch.nn.functional as F
 import conch.open_clip_custom as concher
 # from conch.open_clip_custom import create_model_from_pretrained, tokenize, get_tokenizer
 
+class AdversarialAttack:
+    def __init__(self, model, epsilon=0.01, device="cuda"):
+        """
+        Initializes the adversarial attack class.
+        
+        Args:
+            model (nn.Module): The model to attack. This should be an instance of a class with a defined `forward` method.
+            epsilon (float): The perturbation magnitude for generating adversarial examples.
+            device (str): The device to run the attack on (e.g., "cuda" or "cpu").
+        """
+        self.model = model
+        self.epsilon = epsilon
+        self.device = device
+        self.model.eval()  # Set the model to evaluation mode to avoid updating parameters
+        self.count = 0
+
+    def generate_adversarial_example(self, image, target_label=None):
+        """
+        Generates an adversarial image using the Fast Gradient Sign Method (FGSM).
+        
+        Args:
+            image (torch.Tensor): The input image with shape (1, C, H, W).
+            target_label (torch.Tensor, optional): The target label for a targeted attack. If None, the attack is untargeted.
+        
+        Returns:
+            torch.Tensor: The adversarially perturbed image.
+        """
+        # Move the image to the correct device and ensure it requires gradients
+        image = image.to(self.device)
+        image.requires_grad = True
+        
+        # Forward pass through the model
+        output = self.model.forward(image)
+
+        # If target_label is not provided, use the predicted label for an untargeted attack
+        if target_label is None:
+            target_label = output.argmax(1).to(self.device)
+
+        # Compute the loss using cross-entropy
+        loss = F.cross_entropy(output, target_label)
+        # print("calculating loss")
+
+        # Backward pass to compute gradients
+        self.model.zero_grad()
+        loss.backward()
+
+        # Generate perturbation by taking the sign of the gradient and multiplying by epsilon
+        perturbation = self.epsilon * image.grad.sign()
+        # print("\nperturbation calculated is: ", perturbation)
+        
+        # Create the adversarial image by adding the perturbation to the original image
+        self.count+=1
+        print("\ncreating adversarial image ....",self.count)
+        adversarial_image = image + perturbation
+        
+        # Clip the image to ensure pixel values remain within the [0, 1] range
+        adversarial_image = torch.clamp(adversarial_image, 0, 1)
+
+        return adversarial_image.detach()
+
 class AdverseCLIPEmbedder(nn.Module):
 
     def __init__(self, model, preprocess, name, backbone, ensemble, device, batch_size, num_workers):
@@ -51,6 +111,7 @@ class AdverseCLIPEmbedder(nn.Module):
             return hit
 
     def embed_images(self, list_of_images, device="cuda", num_workers=1, batch_size=32):
+        attack = AdversarialAttack(self, epsilon=0.1, device=device)
         train_dataset = CLIPImageDataset(list_of_images, self.preprocess)
         dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
 
@@ -58,13 +119,16 @@ class AdverseCLIPEmbedder(nn.Module):
         image_embeddings = []
         total = len(list_of_images) // batch_size
         pbar = tqdm.tqdm(total=total, position=0)
-        with torch.no_grad():
-            for images in dataloader:
-                images = images.to(device)
-                for image in images:
-                    # print(f"The shape of an image is ..... {image.shape}")
-                    embeddings = self.forward(image.unsqueeze(0))
-                    image_embeddings.extend(embeddings.detach().cpu().numpy())
+        for images in dataloader:
+            images = images.to(device)
+            adv_images = []
+            for image in images:
+                adv_image = attack.generate_adversarial_example(image.unsqueeze(0))
+                adv_images.append(adv_image)
+            adv_images = torch.cat(adv_images)
+            with torch.no_grad():
+                embeddings = self.forward(adv_images)  # Use the custom forward method
+                image_embeddings.extend(embeddings.detach().cpu().numpy())
 
                 
                 pbar.update(1)

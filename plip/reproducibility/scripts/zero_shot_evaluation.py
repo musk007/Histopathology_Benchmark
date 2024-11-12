@@ -30,6 +30,7 @@ def config():
     parser.add_argument("--finetune_test", default=False, type=bool)
     parser.add_argument("--ensemble", default=False, type=bool)
     parser.add_argument("--adversarial", default=True, type=bool)
+    parser.add_argument("--text_error", default='replace', type=str)   # options include remove,replace,swap
 
     ## Probe hparams
     parser.add_argument("--alpha", default=0.01, type=float)
@@ -46,7 +47,8 @@ if __name__ == "__main__":
         mode = "single caption"
 
     np.random.seed(args.seed)
-
+    print(f"In the avdersarial mode {args.adversarial} ......")
+    
 
     data_folder = os.environ["PC_EVALUATION_DATA_ROOT_FOLDER"]
     print("\n\n")
@@ -83,7 +85,7 @@ if __name__ == "__main__":
     prober = ZeroShotClassifier()
 
     results = prober.zero_shot_classification(test_x, test_y,
-                                              unique_labels=labels, target_labels=test_dataset["label"].tolist(), model_name = args.model_name, test_ds_name = args.dataset)
+                                              unique_labels=labels, target_labels=test_dataset["label"].tolist(), model_name = args.model_name, test_ds_name = args.dataset, ensemble=args.ensemble, text_error = args.text_error, adversarial=args.adversarial)
 
     additional_parameters = {'dataset': args.dataset, 'seed': args.seed,
                              'model': args.model_name, 'backbone': args.backbone}
