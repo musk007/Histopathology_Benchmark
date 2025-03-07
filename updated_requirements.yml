@@ -15,3 +15,7 @@ depndencies:
   #####################   clip / plip / quilt / biomedclip / mi_zero_pubmedbert is working
   - pip install git+https://github.com/Mahmoodlab/CONCH.git
   ##################### conch is working
+  - conda install conda-forge::opencv
+  - pip install monai
+  - pip install staintools
+  - conda install conda-forge::python-spams

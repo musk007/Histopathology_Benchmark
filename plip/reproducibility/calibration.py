@@ -95,7 +95,7 @@ class ECELoss(MaxProbCELoss):
         return np.dot(self.bin_prop, self.bin_score)
 
 
-def save_fig(model_name, dataset, bin_acc, ece, n_bins=50, bar_color=None):
+def save_fig(model_name, dataset, bin_acc, ece, n_bins=50, bar_color=None, dest=None, error_name=None):
     mpl.rcParams['font.size'] = 14
     yellow = '#FFFF00'
 
@@ -152,16 +152,19 @@ def save_fig(model_name, dataset, bin_acc, ece, n_bins=50, bar_color=None):
 
     plt.tight_layout()
 
-    results_path = "/home/roba.majzoub/research/new_plip/plip/reproducibility/calibration"
+    results_path = os.path.join(dest, 'calibration')
+    os.makedirs(results_path, exist_ok=True)
     if not os.path.exists(results_path):
         os.makedirs(results_path)
-    plt.savefig(os.path.join(results_path,f"{model_name}_{dataset}_ensemble_calibration.pdf"))
+    directory_saving = os.path.join(results_path,f"{model_name}_{dataset}_{error_name}_0.3.pdf")
+    print(f"Saved calibration figure at \n{directory_saving}")
+    plt.savefig(os.path.join(results_path,f"{model_name}_{dataset}_{error_name}_0.3.pdf"))
 
 
     return plt
 
 
-def main(logits, labels, passed_accuracy, total, model_name, test_ds_name, unique_labels):
+def main(logits, labels, passed_accuracy, total, model_name, test_ds_name, unique_labels, dest, error_name=None):
 
     np.random.seed(0)
 
@@ -187,8 +190,8 @@ def main(logits, labels, passed_accuracy, total, model_name, test_ds_name, uniqu
     labels_np = labels.cpu().numpy()
     ece = ece_criterion.loss(logits_np, labels_np, unique_labels, 50)
     print(f'{model_name} ECE: {round(ece, 4)}')
-
-    save_fig(model_name, test_ds_name, ece_criterion.bin_acc, ece)
+    save_fig(model_name=model_name, dataset=test_ds_name, bin_acc=ece_criterion.bin_acc, ece=ece, n_bins=50, dest=dest,error_name=error_name)
+    # save_fig(model_name, test_ds_name, bin_acc=ece_criterion.bin_acc, ece=ece, dest=dest)
     return ece
 
 

@@ -28,7 +28,7 @@ def luminance (image_path, choice, req, im_name, dest):
     image = Image.open(image_path)
     os.makedirs(os.path.join(dest, "luminance"), exist_ok=True)
     # for c in range(1,10,2): #4 levels
-    for c in range(7,10,7): #4 levels
+    for c in range(3,10,3): #4 levels
         if req == "bright":
             c_cor = 1 + (c / 10)
         elif req == "dark":
@@ -172,11 +172,11 @@ def flipper (image_path, im_name, severity, dest):
 # 7. Gaussian Blur
 # =============================================================================
 #Number of gaussian levels to test
-num_g_lev = 4
+num_g_lev = 15
 def blur(image_path, im_name, dest):
     image = cv2.imread(image_path)
     os.makedirs(os.path.join(dest, "blurr"), exist_ok=True)
-    for i in range(1,2*num_g_lev,2):
+    for i in range(17,2*num_g_lev,10):
         image_blur = cv2.GaussianBlur(image, (i, i), 0)
         cv2.imwrite(os.path.join(dest, "blurr/"+im_name +f"_{i}_blurred.jpg"), image_blur, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
@@ -189,7 +189,7 @@ def blur(image_path, im_name, dest):
 def compress1(image_path, im_name, dest):
     image = cv2.imread(image_path)
     os.makedirs(os.path.join(dest, "compression"), exist_ok=True)
-    for c in range (5,25,5):
+    for c in range (20,25,5):
         encode_param=[int(cv2.IMWRITE_JPEG_QUALITY), c]
         result, encimg = cv2.imencode('.jpg', image, encode_param)
         decimg = cv2.imdecode(encimg,1)
@@ -224,6 +224,9 @@ def rotator (image_path, im_name, severity, dest):
         image_out = cv2.rotate(image, cv2.ROTATE_180)
     elif severity == 3:
         image_out = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    elif severity == 4:
+        image_out = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        image_out = cv2.flip(image_out, 1)  # horizontal flip
     # else:
     #     image_out = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
     #     image_out = cv2.rotate(image_out, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -322,36 +325,37 @@ def threader(image_path, im_name, size, dest):
     os.makedirs(os.path.join(dest, "thread"), exist_ok=True)
     if size == "small":
         thread_dir = "/l/users/roba.majzoub/artifacts/thread_small"
+        thread0 = cv2.imread(os.path.join(thread_dir,'thread_9.png'), cv2.IMREAD_UNCHANGED)
+        thread1 = cv2.imread(os.path.join(thread_dir,'thread_6.png'), cv2.IMREAD_UNCHANGED)
+        mask0 = np.array(Image.open(os.path.join(thread_dir,'thread_9_mask.jpg')))
+        mask1 = np.array(Image.open(os.path.join(thread_dir,'thread_6_mask.jpg')))
     if size == "large":
         thread_dir = "/l/users/roba.majzoub/artifacts/thread_big"
-    #Load threads
-    thread1 = cv2.imread(os.path.join(thread_dir,'thread_1.png'), cv2.IMREAD_UNCHANGED)
-    thread2 = cv2.imread(os.path.join(thread_dir,'thread_2.png'), cv2.IMREAD_UNCHANGED)
-    thread3 = cv2.imread(os.path.join(thread_dir,'thread_3.png'), cv2.IMREAD_UNCHANGED)
-    thread4 = cv2.imread(os.path.join(thread_dir,'thread_4.png'), cv2.IMREAD_UNCHANGED)
-    thread5 = cv2.imread(os.path.join(thread_dir,'thread_5.png'), cv2.IMREAD_UNCHANGED)
-    thread6 = cv2.imread(os.path.join(thread_dir,'thread_6.png'), cv2.IMREAD_UNCHANGED)
-    thread7 = cv2.imread(os.path.join(thread_dir,'thread_7.png'), cv2.IMREAD_UNCHANGED)
-    thread8 = cv2.imread(os.path.join(thread_dir,'thread_8.png'), cv2.IMREAD_UNCHANGED)
-    thread9 = cv2.imread(os.path.join(thread_dir,'thread_9.png'), cv2.IMREAD_UNCHANGED)
-    thread10 = cv2.imread(os.path.join(thread_dir,'thread_10.png'), cv2.IMREAD_UNCHANGED)
+        thread0 = cv2.imread(os.path.join(thread_dir,'thread_3.png'), cv2.IMREAD_UNCHANGED)
+        thread1 = cv2.imread(os.path.join(thread_dir,'thread_1.png'), cv2.IMREAD_UNCHANGED)
+        mask0 = np.array(Image.open(os.path.join(thread_dir,'thread_3_mask.jpg')))
+        mask1 = np.array(Image.open(os.path.join(thread_dir,'thread_1_mask.jpg')))
+
+    # #Load threads
+    # thread2 = cv2.imread(os.path.join(thread_dir,'thread_2.png'), cv2.IMREAD_UNCHANGED)
+    # thread4 = cv2.imread(os.path.join(thread_dir,'thread_4.png'), cv2.IMREAD_UNCHANGED)
+    # thread5 = cv2.imread(os.path.join(thread_dir,'thread_5.png'), cv2.IMREAD_UNCHANGED)
+    # thread7 = cv2.imread(os.path.join(thread_dir,'thread_7.png'), cv2.IMREAD_UNCHANGED)
+    # thread8 = cv2.imread(os.path.join(thread_dir,'thread_8.png'), cv2.IMREAD_UNCHANGED)
+    # thread10 = cv2.imread(os.path.join(thread_dir,'thread_10.png'), cv2.IMREAD_UNCHANGED)
 
 
-    #Load masks
-    mask1 = np.array(Image.open(os.path.join(thread_dir,'thread_1_mask.jpg')))
-    mask2 = np.array(Image.open(os.path.join(thread_dir,'thread_2_mask.jpg')))
-    mask3 = np.array(Image.open(os.path.join(thread_dir,'thread_3_mask.jpg')))
-    mask4 = np.array(Image.open(os.path.join(thread_dir,'thread_4_mask.jpg')))
-    mask5 = np.array(Image.open(os.path.join(thread_dir,'thread_5_mask.jpg')))
-    mask6 = np.array(Image.open(os.path.join(thread_dir,'thread_6_mask.jpg')))
-    mask7 = np.array(Image.open(os.path.join(thread_dir,'thread_7_mask.jpg')))
-    mask8 = np.array(Image.open(os.path.join(thread_dir,'thread_8_mask.jpg')))
-    mask9 = np.array(Image.open(os.path.join(thread_dir,'thread_9_mask.jpg')))
-    mask10 = np.array(Image.open(os.path.join(thread_dir,'thread_10_mask.jpg')))
+    # #Load masks
+    # mask2 = np.array(Image.open(os.path.join(thread_dir,'thread_2_mask.jpg')))
+    # mask4 = np.array(Image.open(os.path.join(thread_dir,'thread_4_mask.jpg')))
+    # mask5 = np.array(Image.open(os.path.join(thread_dir,'thread_5_mask.jpg')))
+    # mask7 = np.array(Image.open(os.path.join(thread_dir,'thread_7_mask.jpg')))
+    # mask8 = np.array(Image.open(os.path.join(thread_dir,'thread_8_mask.jpg')))
+    # mask10 = np.array(Image.open(os.path.join(thread_dir,'thread_10_mask.jpg')))
     
 
-    masks = [mask1, mask2, mask3, mask4, mask5, mask6, mask7, mask8, mask9, mask10]
-    threads = [thread1, thread2, thread3, thread4, thread5, thread6, thread7, thread8, thread9, thread10]
+    masks = [mask0, mask1]#, mask3, mask4, mask5, mask6, mask7, mask8, mask9, mask10]
+    threads = [thread0, thread1]#, thread3, thread4, thread5, thread6, thread7, thread8, thread9, thread10]
 
     image = cv2.imread(image_path)
     for i in range(len(threads)):
@@ -360,16 +364,20 @@ def threader(image_path, im_name, size, dest):
         temp = cv2.resize(masks[i], (image.shape[0],image.shape[1]), interpolation=cv2.INTER_AREA)
         masks[i] = temp
 
-    i = randint (0, 9)
+    # i = randint (0, 9)
         
-    image_over = transparentOverlay(image,threads[i],(0,0),1)
+    image_over_1 = transparentOverlay(image,threads[0],(0,0),1)
+    image_over_2 = transparentOverlay(image,threads[1],(0,0),1)
     
-    image_blur = cv2.GaussianBlur(image_over, (5, 5), 0)
+    image_blur1 = cv2.GaussianBlur(image_over_1, (5, 5), 0)
+    image_blur2 = cv2.GaussianBlur(image_over_2, (5, 5), 0)
 
     # (0,0,0) is 3 dimensions of numpy and for every dimension 0 is threshold to be masked
-    image_out = np.where(masks[i]==(0, 0, 0), image_over, image_blur)
+    image_out1 = np.where(masks[0]==(0, 0, 0), image_over_1, image_blur1)
+    image_out2 = np.where(masks[1]==(0, 0, 0), image_over_2, image_blur2)
     
-    cv2.imwrite(os.path.join(dest, "thread/"+im_name +f"_{size}_threaded_{i}"+".jpg"), image_out, [cv2.IMWRITE_JPEG_QUALITY, 80])
+    cv2.imwrite(os.path.join(dest, "thread/"+im_name +f"_{size}_threaded_1"+".jpg"), image_out1, [cv2.IMWRITE_JPEG_QUALITY, 80])
+    cv2.imwrite(os.path.join(dest, "thread/"+im_name +f"_{size}_threaded_2"+".jpg"), image_out2, [cv2.IMWRITE_JPEG_QUALITY, 80])
         
 # threader(image_path, im_name, "small")
 # threader(image_path, im_name, "large")

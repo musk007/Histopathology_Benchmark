@@ -3,6 +3,7 @@ sys.path.insert(1, '/home/roba.majzoub/Histopathology_Benchmark/plip')
 import torch
 import clip
 from reproducibility.embedders.plip import CLIPEmbedder
+from reproducibility.embedders.plip_adverse import AdverseCLIPEmbedder
 from reproducibility.embedders.mudipath import build_densenet
 from torchvision import transforms
 from reproducibility.embedders.mudipath import DenseNetEmbedder
@@ -44,7 +45,10 @@ class EmbedderFactory:
         name = args.model_name
         path = args.backbone
         ensemble = args.ensemble
-
+        adverse = args.adversarial
+        batch_size = args.batch_size 
+        num_workers = args.num_workers
+        text_error = args.text_error
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if name == "plip":
@@ -68,7 +72,10 @@ class EmbedderFactory:
                 model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
                 
             model.model.eval()
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
 
         elif name == "clip":
             model, preprocess = clip.load(os.environ["PC_CLIP_ARCH"], device=device)
@@ -77,7 +84,10 @@ class EmbedderFactory:
                 model.load_state_dict(torch.load(args.checkpoint))
                 print(f"loaded {args.model_name} checkpoint ..........\n")
            
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
         
         elif name == "quilt":
 
@@ -90,7 +100,10 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess_val, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess_val, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess_val, name, path, ensemble, text_error)
         
         elif name == "biomedclip":
 
@@ -101,18 +114,13 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
         
         elif name == "conch":
-            # model = timm.create_model("hf_hub:MahmoodLab/CONCH", pretrained=True)
             model, preprocess = concher.create_model_from_pretrained('conch_ViT-B-16', "/l/users/roba.majzoub/models/conch/pytorch_model.bin")
-            # preprocess = transforms.Compose([
-            #     transforms.Resize(size=224, interpolation=bicubic, max_size=None, antialias=warn),
-            #     transforms.CenterCrop(size=(224, 224)),
-            #     transforms.Lambda(lambda img: img.convert('RGB')),
-            #     transforms.ToTensor(),
-            #     transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
-            # ])
             
             
             
@@ -120,7 +128,10 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
 
 
 
@@ -174,7 +185,10 @@ class EmbedderFactory:
                 
 
 
-            return CLIPEmbedder(model, preprocess, name, path, ensemble)
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
 
 
         elif name == "mudipath":
