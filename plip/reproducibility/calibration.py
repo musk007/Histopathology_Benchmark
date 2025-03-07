@@ -154,6 +154,7 @@ def save_fig(model_name, dataset, bin_acc, ece, n_bins=50, bar_color=None, dest=
 
     results_path = os.path.join(dest, 'calibration')
     os.makedirs(results_path, exist_ok=True)
+
     if not os.path.exists(results_path):
         os.makedirs(results_path)
     directory_saving = os.path.join(results_path,f"{model_name}_{dataset}_{error_name}_0.3.pdf")

@@ -34,6 +34,7 @@ class ZeroShotClassifier:
             folder_path = f"/home/roba.majzoub/Histopathology_Benchmark/plip/ensemble/{test_ds_name}/"
             
         else:
+
             folder_path = f"/home/roba.majzoub/Histopathology_Benchmark/plip/results/{test_ds_name}/"
 
         if adversarial:

@@ -24,6 +24,7 @@ class CLIPEmbedder:
         self.backbone = backbone
         self.ensemble = ensemble
         self.text_error = text_error
+
         
     def get_model(self):
         return self.model, self.preprocess
@@ -40,7 +41,7 @@ class CLIPEmbedder:
 
     def text_embedder(self, list_of_labels, device="cuda", num_workers=1, batch_size=32,ensemble_components=None, additional_cache_name=""):
         hit_or_miss = cache_hit_or_miss(self.name + "txt" + additional_cache_name, self.backbone)
-
+ 
         if hit_or_miss is not None:
             return hit_or_miss
         else:
@@ -107,15 +108,17 @@ class CLIPEmbedder:
         dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
         text_embeddings = []
         total = len(list_of_labels) // batch_size
+        
 
         pbar = tqdm.tqdm(total=total, position=0)
         with torch.no_grad():
             for captions in dataloader:
                 ###### creating ensemble predictions
                 if self.ensemble == True:
-                    
+
                     classnames = ensemble_components['0']["classnames"]
                     templates = ensemble_components['0']["templates"]             
+
                     ##### Introducing text errorrs in ensemble mode
                     if self.text_error in ["swap","replace","remove"]:
                         print("Introducing text errorrs in ensemble mode.......")
@@ -156,6 +159,7 @@ class CLIPEmbedder:
                                 class_embedding = torch.stack(embeddings_for_class, dim=0)
                                 class_embedding = class_embedding.mean(dim=(0, 1))
                                 # class_embedding /= class_embedding.norm()
+
                                 zeroshot_weights.append(class_embedding.detach().cpu().numpy())
                         text_embeddings.extend(zeroshot_weights) # for plip
 
@@ -277,6 +281,7 @@ class CLIPEmbedder:
                     elif self.name == "clip":
                         idx = clip.tokenize(captions, truncate=True).to(device)
                 
+
                         text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy()) # for clip
                             
                     elif self.name == "plip":
@@ -320,17 +325,20 @@ class CLIPEmbedder:
                         texts = torch.from_numpy(np.array(texts)).to(device)
                         attention_mask = torch.from_numpy(np.array(attention_mask)).to(device)
                         class_embeddings = self.model.encode_text(texts, attention_mask=attention_mask)
+
                      
+
                     
                         text_embeddings.extend(class_embeddings.detach().cpu().numpy())
 
                     elif "conch" in self.name:
-                        # pass
+
                         tokenizer = concher.get_tokenizer()
                         tokenized_prompts = concher.tokenize(texts=captions, tokenizer=tokenizer).to(device)
                         text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
                         
-                        # text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy())
+
+
                     pbar.update(1)
 
                 pbar.close()

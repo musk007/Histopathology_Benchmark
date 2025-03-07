@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/Histopathology_Benchmark')
+
 import clip
 import tqdm
 import numpy as np
@@ -16,6 +16,7 @@ from transformers import AutoTokenizer
 import torch.nn.functional as F
 import conch.open_clip_custom as concher
 # from conch.open_clip_custom import create_model_from_pretrained, tokenize, get_tokenizer
+
 
 
 '''
@@ -57,6 +58,7 @@ def forward(self, images, labels):
 
 class AdversarialAttack:
     def __init__(self, model, epsilon=8, device="cuda"):
+
         """
         Initializes the adversarial attack class.
         
@@ -72,7 +74,7 @@ class AdversarialAttack:
         self.count = 0
         self.alpha = 2 / 255.0
 
-    
+   
 
     def generate_adversarial_example(self, image, target_label=None):
         """
@@ -141,6 +143,7 @@ class AdverseCLIPEmbedder(nn.Module):
         self.batch_size = batch_size
         self.num_workers = num_workers
         
+
     def get_model(self):
         return self.model, self.preprocess
             
@@ -166,6 +169,7 @@ class AdverseCLIPEmbedder(nn.Module):
 
     def embed_images(self, list_of_images, device="cuda", num_workers=1, batch_size=32):
         attack = AdversarialAttack(self, epsilon=0.3, device=device)
+
         train_dataset = CLIPImageDataset(list_of_images, self.preprocess)
         dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
 
@@ -183,10 +187,6 @@ class AdverseCLIPEmbedder(nn.Module):
             with torch.no_grad():
                 embeddings = self.forward(adv_images)  # Use the custom forward method
                 image_embeddings.extend(embeddings.detach().cpu().numpy())
-
-                    # # print(f"The shape of an image is ..... {image.shape}")
-                    # embeddings = self.forward(image.unsqueeze(0))
-                    # image_embeddings.extend(embeddings.detach().cpu().numpy())
 
                 
                 pbar.update(1)
