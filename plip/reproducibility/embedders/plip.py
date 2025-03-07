@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/research/updater/Histopathology_Benchmark/plip')
+sys.path.insert(1, '/home/roba.majzoub/Histopathology_Benchmark')
 import clip
 import tqdm
 import numpy as np
@@ -13,8 +13,7 @@ from open_clip import get_tokenizer
 from src.zeroshot_utils import zeroshot_path
 from transformers import AutoTokenizer
 import torch.nn.functional as F
-import conch.open_clip_custom as concher
-# from conch.open_clip_custom import create_model_from_pretrained, tokenize, get_tokenizer
+import CONCH.conch.open_clip_custom as concher
 
 class CLIPEmbedder:
 
@@ -25,9 +24,11 @@ class CLIPEmbedder:
         self.backbone = backbone
         self.ensemble = ensemble
         self.text_error = text_error
-       
+
         
-        
+    def get_model(self):
+        return self.model, self.preprocess
+
     def image_embedder(self, list_of_images, device="cuda", num_workers=1, batch_size=32, additional_cache_name=""):
         hit_or_miss = cache_hit_or_miss_raw_filename(self.name + "img" + additional_cache_name, self.backbone)
 
@@ -114,10 +115,10 @@ class CLIPEmbedder:
             for captions in dataloader:
                 ###### creating ensemble predictions
                 if self.ensemble == True:
-                    
-                    
+
                     classnames = ensemble_components['0']["classnames"]
-                    templates = ensemble_components['0']["templates"]
+                    templates = ensemble_components['0']["templates"]             
+
                     ##### Introducing text errorrs in ensemble mode
                     if self.text_error in ["swap","replace","remove"]:
                         print("Introducing text errorrs in ensemble mode.......")
@@ -157,7 +158,8 @@ class CLIPEmbedder:
                                     embeddings_for_class.append(F.normalize(classname_embeddings, dim=-1))
                                 class_embedding = torch.stack(embeddings_for_class, dim=0)
                                 class_embedding = class_embedding.mean(dim=(0, 1))
-                                class_embedding /= class_embedding.norm()
+                                # class_embedding /= class_embedding.norm()
+
                                 zeroshot_weights.append(class_embedding.detach().cpu().numpy())
                         text_embeddings.extend(zeroshot_weights) # for plip
 
@@ -268,18 +270,18 @@ class CLIPEmbedder:
                 if self.ensemble == False:
                     #### Introducing text errorrs in single caption mode
                     if self.text_error in ["swap","replace","remove"]:
-                        print("Introducing errorrs in single caption mode ........")
+                        print(f"Introducing {text_error} in single caption mode ........")
                         for i in range(len(captions)):
                             captions[i] = self.introduce_errors(list(captions[i]),3,[text_error])
-
                     if self.name == "quilt":
                         tokenizer = open_clip.get_tokenizer('hf-hub:wisdomik/QuiltNet-B-32')
                         idx = tokenizer(captions).to(device)
+                        # idx = tokenizer.tokenize(captions, truncate=True).to(device)
                         text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy()) # for quilt
-
                     elif self.name == "clip":
                         idx = clip.tokenize(captions, truncate=True).to(device)
-                        print(f"idx shape is : {idx.shape}")
+                
+
                         text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy()) # for clip
                             
                     elif self.name == "plip":
@@ -323,17 +325,19 @@ class CLIPEmbedder:
                         texts = torch.from_numpy(np.array(texts)).to(device)
                         attention_mask = torch.from_numpy(np.array(attention_mask)).to(device)
                         class_embeddings = self.model.encode_text(texts, attention_mask=attention_mask)
-                        ### The following were not used here since they are usually used for the WSI classification task
-                        # class_embedding = F.normalize(class_embeddings, dim=-1).mean(dim=0)
-                        # class_embedding /= class_embedding.norm()
-                        # idx = tokenizer(captions).to(device)
+
+                     
+
                     
                         text_embeddings.extend(class_embeddings.detach().cpu().numpy())
 
                     elif "conch" in self.name:
+
                         tokenizer = concher.get_tokenizer()
                         tokenized_prompts = concher.tokenize(texts=captions, tokenizer=tokenizer).to(device)
                         text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
+                        
+
 
                     pbar.update(1)
 

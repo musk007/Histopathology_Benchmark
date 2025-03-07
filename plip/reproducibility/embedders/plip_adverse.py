@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/research/updater/Histopathology_Benchmark/plip')
+
 import clip
 import tqdm
 import numpy as np
@@ -17,8 +17,48 @@ import torch.nn.functional as F
 import conch.open_clip_custom as concher
 # from conch.open_clip_custom import create_model_from_pretrained, tokenize, get_tokenizer
 
+
+
+'''
+def forward(self, images, labels):
+        r"""
+        Overridden.
+        """
+
+        images = images.clone().detach().to(self.device)
+        orig_images = images.clone().detach().to(self.device)
+ 
+        with torch.no_grad():
+            orig_output = self.model.forward(orig_images)
+        
+        perturbations = torch.randn_like(images).uniform_(-self.eps, self.eps)
+
+        adv_images = images + perturbations
+        adv_images = torch.clamp(adv_images, min=0, max=1).detach()
+        adv_images.requires_grad = True
+ 
+        outputs = self.model.forward(adv_images)
+ 
+        # Calculate loss
+        cost = nn.functional.cosine_similarity(orig_output, outputs)
+        
+ 
+        # Update adversarial images
+        grad = torch.autograd.grad(
+            -cost, adv_images, retain_graph=False, create_graph=False
+        )[0]
+ 
+        adv_images = adv_images + self.alpha * grad.sign()
+        delta = torch.clamp(adv_images - images, min=-self.eps, max=self.eps)
+        adv_images = torch.clamp(images + delta, min=0, max=1).detach()
+ 
+        return adv_images
+'''
+
+
 class AdversarialAttack:
-    def __init__(self, model, epsilon=0.01, device="cuda"):
+    def __init__(self, model, epsilon=8, device="cuda"):
+
         """
         Initializes the adversarial attack class.
         
@@ -28,10 +68,13 @@ class AdversarialAttack:
             device (str): The device to run the attack on (e.g., "cuda" or "cpu").
         """
         self.model = model
-        self.epsilon = epsilon
+        self.epsilon = epsilon / 255.0  # Convert epsilon to the range [0, 1]
         self.device = device
         self.model.eval()  # Set the model to evaluation mode to avoid updating parameters
         self.count = 0
+        self.alpha = 2 / 255.0
+
+   
 
     def generate_adversarial_example(self, image, target_label=None):
         """
@@ -44,38 +87,49 @@ class AdversarialAttack:
         Returns:
             torch.Tensor: The adversarially perturbed image.
         """
-        # Move the image to the correct device and ensure it requires gradients
-        image = image.to(self.device)
-        image.requires_grad = True
         
-        # Forward pass through the model
-        output = self.model.forward(image)
 
-        # If target_label is not provided, use the predicted label for an untargeted attack
-        if target_label is None:
-            target_label = output.argmax(1).to(self.device)
+        # Calculate min and max
+        min_val = image.min()
+        max_val = image.max()
 
-        # Compute the loss using cross-entropy
-        loss = F.cross_entropy(output, target_label)
-        # print("calculating loss")
+        # Normalize the image to [0, 1]
+        image = (image - min_val) / (max_val - min_val)
+        print(f"Image values: {image.min()} , {image.max()}")
 
-        # Backward pass to compute gradients
-        self.model.zero_grad()
-        loss.backward()
-
-        # Generate perturbation by taking the sign of the gradient and multiplying by epsilon
-        perturbation = self.epsilon * image.grad.sign()
-        # print("\nperturbation calculated is: ", perturbation)
+        images = image.clone().detach().to(self.device)
+        orig_images = image.clone().detach().to(self.device)
+ 
+        with torch.no_grad():
+            orig_output = self.model.forward(orig_images)
         
-        # Create the adversarial image by adding the perturbation to the original image
-        self.count+=1
-        print("\ncreating adversarial image ....",self.count)
-        adversarial_image = image + perturbation
-        
-        # Clip the image to ensure pixel values remain within the [0, 1] range
-        adversarial_image = torch.clamp(adversarial_image, 0, 1)
+        perturbations = torch.randn_like(images).uniform_(-self.epsilon, self.epsilon)
 
-        return adversarial_image.detach()
+        adv_images = images + perturbations
+        adv_images = torch.clamp(adv_images, min=0, max=1).detach()
+        adv_images.requires_grad = True
+ 
+        outputs = self.model.forward(adv_images)
+ 
+        # Calculate loss
+        cost = -nn.functional.cosine_similarity(orig_output, outputs)
+        
+        print(f"Original loss ... {cost}")
+        # Update adversarial images
+        grad = torch.autograd.grad(
+            cost, adv_images, retain_graph=False, create_graph=False
+        )[0]
+ 
+        adv_images = adv_images + self.alpha * grad.sign()
+        delta = torch.clamp(adv_images - images, min=-self.epsilon, max=self.epsilon)
+        adv_images = torch.clamp(images + delta, min=0, max=1).detach()
+        new_cost = -nn.functional.cosine_similarity(orig_output, self.model.forward(adv_images))
+        print(f"Loss after the perturbations ... {new_cost}")
+
+        
+
+
+        return adv_images
 
 class AdverseCLIPEmbedder(nn.Module):
 
@@ -89,7 +143,10 @@ class AdverseCLIPEmbedder(nn.Module):
         self.batch_size = batch_size
         self.num_workers = num_workers
         
-        
+
+    def get_model(self):
+        return self.model, self.preprocess
+            
     def image_embedder(self, list_of_images, device="cuda", num_workers=1, batch_size=32, additional_cache_name=""):
         hit_or_miss = cache_hit_or_miss_raw_filename(self.name + "img" + additional_cache_name, self.backbone)
 
@@ -111,7 +168,8 @@ class AdverseCLIPEmbedder(nn.Module):
             return hit
 
     def embed_images(self, list_of_images, device="cuda", num_workers=1, batch_size=32):
-        attack = AdversarialAttack(self, epsilon=0.1, device=device)
+        attack = AdversarialAttack(self, epsilon=0.3, device=device)
+
         train_dataset = CLIPImageDataset(list_of_images, self.preprocess)
         dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
 
