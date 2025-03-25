@@ -32,7 +32,7 @@ bash zero_shot.sh
 ## Datasets
    | Dataset Name | Dataset Link | Paper Link |
    |--------------|--------------|------------|
-   | PanNuke    | [View Dataset](https://warwick.ac.uk/fac/cross_fac/tia/data/pannuke) | [Read Paper1]([http://example.com/paper1](https://arxiv.org/pdf/2003.10778),[Read Paper2](https://link.springer.com/chapter/10.1007/978-3-030-23937-4_2) |
+   | PanNuke    | [View Dataset](https://warwick.ac.uk/fac/cross_fac/tia/data/pannuke) | [Read Paper1](https://arxiv.org/pdf/2003.10778),[Read Paper2](https://link.springer.com/chapter/10.1007/978-3-030-23937-4_2) |
    | CAMEL    | [View Dataset](https://github.com/ThoroughImages/CAMEL) | [Read Paper](https://arxiv.org/abs/1908.10555) |
    | Kather-16    | [View Dataset](https://zenodo.org/records/53169) | [Read Paper](https://www.nature.com/articles/srep27988) |
    | CRC-100K    | [View Dataset](https://zenodo.org/records/1214456) | [Read Paper](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002730) |
