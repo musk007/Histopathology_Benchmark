@@ -4,6 +4,31 @@
 ![Benchmark Overview](overview.png)
 We introduce Histo-VL, a fully open-source benchmark comprising images from 11 distinct acquisition tools, each with tailored captions incorporating class names and varied pathology descriptions. Histo-VL spans 26 organs and 31 cancer types, featuring tissue samples from 14 heterogeneous patient cohorts—totaling over 5 million patches from more than 41,000 WSIs at multiple magnification levels. We systematically evaluate histopathology visual-language models on Histo-VL to emulate expert tasks in clinical scenarios, providing a uniform framework to assess their real-world performance.
 The following is a link to paper preprint [![paper](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2503.12990)
+
+## Installation
+1. Clone this repo and the [CONCH](https://github.com/mahmoodlab/CONCH) github repository.
+2. Create an environment using the provided .yml file
+```
+conda env create -f benchmark.yml
+conda activate benchmark
+cd CONCH
+pip install --upgrade pip
+pip install -e .
+pip install ../timm_ctp.tar --no-deps
+```
+3. Install requirements in the updated_requirements file.
+4. Add the relative paths in :
+    * The paths to the data, caching and results folder in the dotenv file : "plip/reproducibility/config_example.env"
+    * The paths to the CONCH and MI-Zero models in : "plip/reproducibility/factory.py". The CONCH models can be downloaded from [here](https://huggingface.co/MahmoodLab/CONCH), and MI-Zero models from [here](https://github.com/mahmoodlab/MI-Zero)
+    * Path to MI-Zero configuration path in : "plip/src/models/factory.py"
+
+## Running Zero-shot
+5. Run the following bash file in "plip/reproducibility" :
+```
+bash zero_shot.sh
+```
+6. To run experiments for the adversarial image or text corruptions or caption ensembling, you can specify that in the zero_shot.sh bash file or in plip/reproducibility/train.py
+
 ## Datasets
    | Dataset Name | Dataset Link | Paper Link |
    |--------------|--------------|------------|
@@ -39,24 +64,4 @@ The following is a link to paper preprint [![paper](https://img.shields.io/badge
    | Prostate Grading    | [View Dataset](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/OCYCMP) | [Read Paper](https://www.nature.com/articles/s41598-018-30535-1)  |
    | GasHisSDB    | [View Dataset](https://gitee.com/neuhwm/GasHisSDB#https://gitee.com/link?target=https%3A%2F%2Fdoi.org%2F10.6084%2Fm9.figshare.15066147.v1) | [Read Paper](-)  |
    | PCam    | [View Dataset]() | [Read Paper]()  |
-## Installation
-1. Clone this repo and the [CONCH](https://github.com/mahmoodlab/CONCH) github repository.
-2. Create an environment using the provided .yml file
-```
-conda env create -f benchmark.yml
-conda activate benchmark
-cd CONCH
-pip install --upgrade pip
-pip install -e .
-pip install timm_ctp.tar --no-deps
-```
-3. Add the relative paths in :
-    * The paths to the data, caching and results folder in the dotenv file : "plip/reproducibility/config_example.env"
-    * The paths to the CONCH and MI-Zero models in : "plip/reproducibility/factory.py". The CONCH models can be downloaded from [here](https://huggingface.co/MahmoodLab/CONCH), and MI-Zero models from [here](https://github.com/mahmoodlab/MI-Zero)
-    * Path to MI-Zero configuration path in : "plip/src/models/factory.py"
 
-## Running Zero-shot
-3. Run the following bash file in "plip/reproducibility" :
-```
-bash zero_shot.sh
-``` 
