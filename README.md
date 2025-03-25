@@ -32,14 +32,14 @@ bash zero_shot.sh
 ## Datasets
    | Dataset Name | Dataset Link | Paper Link |
    |--------------|--------------|------------|
-   | PanNuke    | [View Dataset](https://warwick.ac.uk/fac/cross_fac/tia/data/pannuke) | [Read Paper]([http://example.com/paper1](https://arxiv.org/pdf/2003.10778)),[Read Paper2](https://link.springer.com/chapter/10.1007/978-3-030-23937-4_2) |
+   | PanNuke    | [View Dataset](https://warwick.ac.uk/fac/cross_fac/tia/data/pannuke) | [Read Paper1]([http://example.com/paper1](https://arxiv.org/pdf/2003.10778)),[Read Paper2](https://link.springer.com/chapter/10.1007/978-3-030-23937-4_2) |
    | CAMEL    | [View Dataset](https://github.com/ThoroughImages/CAMEL) | [Read Paper](https://arxiv.org/abs/1908.10555) |
    | Kather-16    | [View Dataset](https://zenodo.org/records/53169) | [Read Paper](https://www.nature.com/articles/srep27988) |
    | CRC-100K    | [View Dataset](https://zenodo.org/records/1214456) | [Read Paper 1](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002730) |
    | DigestPath (Kaggle)    | [View Dataset](https://www.kaggle.com/datasets/mittalswathi/digestpath-dataset) | - |
    | WSSS4LUAD    | [View Dataset](https://wsss4luad.grand-challenge.org/) | [Read Paper](https://arxiv.org/abs/2204.06455)  |
    | BACH    | [View Dataset](https://zenodo.org/records/3632035) | [Read Paper](https://arxiv.org/pdf/1808.04277)  |
-   | BCNB    | [View Dataset](https://drive.google.com/drive/folders/1HcAgplKwbSZ7ZZl2m6PZdvVF70QJmVuR) | [Read Paper]([https://arxiv.org/pdf/1808.04277](https://www.frontiersin.org/journals/oncology/articles/10.3389/fonc.2021.759007/full))  |
+   | BCNB    | [View Dataset](https://drive.google.com/drive/folders/1HcAgplKwbSZ7ZZl2m6PZdvVF70QJmVuR) | [Read Paper](https://www.frontiersin.org/journals/oncology/articles/10.3389/fonc.2021.759007/full))  |
    | BRACS    | [View Dataset](https://www.bracs.icar.cnr.it/download/) | [Read Paper](-)  |
    | BreakHist    | [View Dataset](https://web.inf.ufpr.br/vri/databases/breast-cancer-histopathological-database-breakhis/) | [Read Paper](https://ieeexplore.ieee.org/document/7312934)  |
    | Chaoyang    | [View Dataset](https://bupt-ai-cz.github.io/HSA-NRL/) | [Read Paper](https://ieeexplore.ieee.org/document/9600806)  |
