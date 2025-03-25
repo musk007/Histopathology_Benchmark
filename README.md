@@ -1,5 +1,5 @@
 # How Good is my Histopathology Vision-Language Foundation Model? A Holistic Benchmark
-## **Mohamed Bin Zayed University of Artificial Intelligence, Khalifa University, Shaukat Khanum Cancer Hospital, Linko ̈ping University, and Australian National University**
+## **Mohamed Bin Zayed University of Artificial Intelligence, Khalifa University and Shaukat Khanum Cancer Hospital**
 
 ![Benchmark Overview](overview.png)
 We introduce Histo-VL, a fully open-source benchmark comprising images from 11 distinct acquisition tools, each with tailored captions incorporating class names and varied pathology descriptions. Histo-VL spans 26 organs and 31 cancer types, featuring tissue samples from 14 heterogeneous patient cohorts—totaling over 5 million patches from more than 41,000 WSIs at multiple magnification levels. We systematically evaluate histopathology visual-language models on Histo-VL to emulate expert tasks in clinical scenarios, providing a uniform framework to assess their real-world performance.
