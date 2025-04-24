@@ -1,6 +1,6 @@
 #! /bin/bash
 #SBATCH --job-name=artification # Job name
-#SBATCH --output=/home/roba.majzoub/Histopathology_Benchmark/plip/reproducibility/generate_validation_datasets/slurm_out/output_.%A.txt # Standard output and error.
+#SBATCH --output=/output_.%A.txt # Standard output and error.
 #SBATCH --nodes=1 
 #SBATCH --ntasks=1 
 #SBATCH --mem=40G
