@@ -21,14 +21,14 @@ pip install ../timm_ctp.tar --no-deps
     * The paths to the data, caching and results folder in the dotenv file : "plip/reproducibility/config_example.env"
     * The paths to the CONCH and MI-Zero models in : "plip/reproducibility/factory.py". The CONCH models can be downloaded from [here](https://huggingface.co/MahmoodLab/CONCH), and MI-Zero models from [here](https://github.com/mahmoodlab/MI-Zero)
     * Path to MI-Zero configuration path in : "plip/src/models/factory.py"
-
+5. The captions for both available in the BenchCaption folder as well as the captions and splits for other experiments as well.
 ## Running Zero-shot
-5. Run the following bash file in "plip/reproducibility" :
+6. Run the following bash file in "plip/reproducibility" :
 ```
 bash zero_shot.sh
 ```
-6. To run experiments for the adversarial image or text corruptions or caption ensembling, you can specify that in the zero_shot.sh bash file or in plip/reproducibility/train.py
-7. To create artifacts of a specific dataset, you can run the script at plip/reproducibility/generate_validation_datasets/artifactor.sh, which allows the creation of multiple types of artifacts, including blurring, rotation, addition of fat, squamous epithelial cells, and more.
+7. To run experiments for the adversarial image or text corruptions or caption ensembling, you can specify that in the zero_shot.sh bash file or in plip/reproducibility/train.py
+8. To create artifacts of a specific dataset, you can run the script at plip/reproducibility/generate_validation_datasets/artifactor.sh, which allows the creation of multiple types of artifacts, including blurring, rotation, addition of fat, squamous epithelial cells, and more.
 
 ## Datasets
    | Dataset Name | Dataset Link | Paper Link |
