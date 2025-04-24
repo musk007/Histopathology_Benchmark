@@ -28,6 +28,7 @@ pip install ../timm_ctp.tar --no-deps
 bash zero_shot.sh
 ```
 6. To run experiments for the adversarial image or text corruptions or caption ensembling, you can specify that in the zero_shot.sh bash file or in plip/reproducibility/train.py
+7. To create artifacts of a specific dataset, you can run the script at plip/reproducibility/generate_validation_datasets/artifactor.sh, which allows the creation of multiple types of artifacts, including blurring, rotation, addition of fat, squamous epithelial cells, and more.
 
 ## Datasets
    | Dataset Name | Dataset Link | Paper Link |
