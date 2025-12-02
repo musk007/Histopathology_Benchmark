@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: conch
 Version: 0.1.0
 Summary: CONCH: a vision language foundation model for human pathology.
@@ -18,6 +18,7 @@ Requires-Dist: regex
 Requires-Dist: ftfy
 Requires-Dist: h5py
 Requires-Dist: pandas
+Dynamic: license-file
 
 CONCH 🐚 
 ===========

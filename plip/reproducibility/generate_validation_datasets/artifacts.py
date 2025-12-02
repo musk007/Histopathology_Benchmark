@@ -15,12 +15,6 @@ import cv2
 import monai
 # import staintools
 
-# image_path = "/l/users/roba.majzoub/artifacts/535940-IMG012x028-2.JPG"
-# # image_path = "/l/users/roba.majzoub/plip_data/TCGA-Uniform/Adrenocortical_carcinoma/5/TCGA-OR-A5J1-01Z-00-DX1/0_0_1013.jpg"
-# dest = "/l/users/roba.majzoub/artifacts/outputs"
-
-# image = Image.open(image_path)
-
 # =============================================================================
 # 1. Brightness and Contrast
 # =============================================================================
@@ -40,11 +34,6 @@ def luminance (image_path, choice, req, im_name, dest):
         image_out = image_enh.enhance(c_cor)
         image_out.save(os.path.join(dest, f"luminance/{im_name}_{choice}_{req}_{c}.jpg"), quality=80)
 
-# im_name = image_path.split("/")[-1].split(".")[0]
-# luminance(image, "contrast", "bright", im_name)
-# luminance(image, "contrast", "dark", im_name)
-# luminance(image, "brightness", "bright", im_name)
-# luminance(image, "brightness", "dark", im_name)
 
 
 # =============================================================================
@@ -102,8 +91,7 @@ def spottify(image_path,im_name, size, dest):
         image_ou = cv2.cvtColor(image_out, cv2.COLOR_BGR2RGB)
         cv2.imwrite(os.path.join(dest, "spots/"+im_name +f"_spots_{size}_{i}"+".jpg"), image_out, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-# spottify(image_path, im_name, "small")
-# spottify(image_path, im_name, "large")
+
 
 # =============================================================================
 # 3. Elastic Deformations
@@ -125,7 +113,7 @@ def elastic(image_path, im_name, dest):
             
             cv2.imwrite(os.path.join(dest, "elastic/"+im_name +f"_elastic_{i}"+".jpg"), image_el, [cv2.IMWRITE_JPEG_QUALITY, 80])
         
-# elastic(image_path, im_name)
+
 
 # =============================================================================
 # 4. Fat Droplets
@@ -140,10 +128,7 @@ def fatify(image_path, im_name, alpha_factor, dest):
     image_out = transparentOverlay(image,fat,(0,0),1, alpha_factor)
     cv2.imwrite(os.path.join(dest, "fat/"+im_name +f"_fat_{alpha_factor}.jpg"), image_out, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-# fatify(image_path, im_name, 0.5)
-# fatify(image_path, im_name, 1)
-# fatify(image_path, im_name, 1.5)
-# fatify(image_path, im_name, 2)
+
 
 # =============================================================================
 # 6. Flipping
@@ -163,20 +148,17 @@ def flipper (image_path, im_name, severity, dest):
         image_out = cv2.flip(flipped_temp, 1)
     cv2.imwrite(os.path.join(dest, "flip/"+im_name +f"_flipped_{severity}.jpg"), image_out, [cv2.IMWRITE_JPEG_QUALITY, 80])
     
-# flipper(image_path, im_name, 1)
-# flipper(image_path, im_name, 2)
-# flipper(image_path, im_name, 3)
-# flipper(image_path, im_name, 4)
+
 
 # =============================================================================
 # 7. Gaussian Blur
 # =============================================================================
 #Number of gaussian levels to test
-num_g_lev = 15
+num_g_lev = 25
 def blur(image_path, im_name, dest):
     image = cv2.imread(image_path)
     os.makedirs(os.path.join(dest, "blurr"), exist_ok=True)
-    for i in range(17,2*num_g_lev,10):
+    for i in range(45,2*num_g_lev,10):
         image_blur = cv2.GaussianBlur(image, (i, i), 0)
         cv2.imwrite(os.path.join(dest, "blurr/"+im_name +f"_{i}_blurred.jpg"), image_blur, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
@@ -204,11 +186,7 @@ def compress2(image_path, im_name, quality, dest):
     # Save with high compression (low quality)
     image.save(os.path.join(dest,"compression/"+im_name+f"_{quality}_compression_2.jpg"), quality=10)
 
-# compress1(image_path, im_name)
-# compress2(image_path, im_name, 5)
-# compress2(image_path, im_name, 10)
-# compress2(image_path, im_name, 50)
-# compress2(image_path, im_name, 70)
+
 
 # =============================================================================
 # 9. Rotation
@@ -227,16 +205,10 @@ def rotator (image_path, im_name, severity, dest):
     elif severity == 4:
         image_out = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         image_out = cv2.flip(image_out, 1)  # horizontal flip
-    # else:
-    #     image_out = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
-    #     image_out = cv2.rotate(image_out, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
 
     cv2.imwrite(os.path.join(dest, "rotate/"+im_name +f"_rotated_{severity}.jpg"), image_out, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-# rotator(image_path, im_name, 1)
-# rotator(image_path, im_name, 2)
-# rotator(image_path, im_name, 3)
-# rotator(image_path, im_name, 4)
 
 # =============================================================================
 # 10. Squamous epithelia
@@ -281,40 +253,37 @@ def squamous(image_path, im_name, severity, dest):
         image_out = transparentOverlay(image,eps[i],(he,wi),1)
         cv2.imwrite(os.path.join(dest, "squamous/"+im_name +f"_squamous_{severity}"+".jpg"), image_out, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-# squamous(image_path, im_name, 1)
-# squamous(image_path, im_name, 2)
-# squamous(image_path, im_name, 3)
-# squamous(image_path, im_name, 4)
 
-# =============================================================================
-# 11. Stain         NOT WORKING YET
-# =============================================================================
-stain_dir = '/l/users/roba.majzoub/artifacts/schemes_ready'
-stain_types = sorted(os.listdir(stain_dir))
-def stainer(image_path, im_name, dest):
-    for stain_type in stain_types:
-        st = staintools.read_image(stain_dir + stain_type)
-        standardizer = staintools.BrightnessStandardizer()
-        stain_norm = staintools.StainNormalizer(method='macenko')
-        stain_norm.fit(st)
+
+# # =============================================================================
+# # 11. Stain         NOT WORKING YET
+# # =============================================================================
+# stain_dir = '/l/users/roba.majzoub/artifacts/schemes_ready'
+# stain_types = sorted(os.listdir(stain_dir))
+# def stainer(image_path, im_name, dest):
+#     for stain_type in stain_types:
+#         st = staintools.read_image(stain_dir + stain_type)
+#         standardizer = staintools.BrightnessStandardizer()
+#         stain_norm = staintools.StainNormalizer(method='macenko')
+#         stain_norm.fit(st)
         
-        path_result = path_result_gl + "_" + stain_type + ".txt"
+#         path_result = path_result_gl + "_" + stain_type + ".txt"
         
         
         
-        image = Image.open(image_path)
-        im = np.array(image)
-        #stain normalization
-        im = standardizer.transform(im)
+#         image = Image.open(image_path)
+#         im = np.array(image)
+#         #stain normalization
+#         im = standardizer.transform(im)
         
-        try:
-            im = stain_norm.transform(im)
-            i=1
-            print(f"stain transfer successful for {stain_type}")
-        except:
-            print("exception")
-            i=0 #to control if stain transfer was possible for all patches
-        print("ready")
+#         try:
+#             im = stain_norm.transform(im)
+#             i=1
+#             print(f"stain transfer successful for {stain_type}")
+#         except:
+#             print("exception")
+#             i=0 #to control if stain transfer was possible for all patches
+#         print("ready")
 
 
 
@@ -323,61 +292,44 @@ def stainer(image_path, im_name, dest):
 # =============================================================================
 def threader(image_path, im_name, size, dest):
     os.makedirs(os.path.join(dest, "thread"), exist_ok=True)
+
+    # (keep your existing thread_dir selection here)
     if size == "small":
         thread_dir = "/l/users/roba.majzoub/artifacts/thread_small"
-        thread0 = cv2.imread(os.path.join(thread_dir,'thread_9.png'), cv2.IMREAD_UNCHANGED)
-        thread1 = cv2.imread(os.path.join(thread_dir,'thread_6.png'), cv2.IMREAD_UNCHANGED)
-        mask0 = np.array(Image.open(os.path.join(thread_dir,'thread_9_mask.jpg')))
-        mask1 = np.array(Image.open(os.path.join(thread_dir,'thread_6_mask.jpg')))
-    if size == "large":
+    else:
         thread_dir = "/l/users/roba.majzoub/artifacts/thread_big"
-        thread0 = cv2.imread(os.path.join(thread_dir,'thread_3.png'), cv2.IMREAD_UNCHANGED)
-        thread1 = cv2.imread(os.path.join(thread_dir,'thread_1.png'), cv2.IMREAD_UNCHANGED)
-        mask0 = np.array(Image.open(os.path.join(thread_dir,'thread_3_mask.jpg')))
-        mask1 = np.array(Image.open(os.path.join(thread_dir,'thread_1_mask.jpg')))
 
-    # #Load threads
-    # thread2 = cv2.imread(os.path.join(thread_dir,'thread_2.png'), cv2.IMREAD_UNCHANGED)
-    # thread4 = cv2.imread(os.path.join(thread_dir,'thread_4.png'), cv2.IMREAD_UNCHANGED)
-    # thread5 = cv2.imread(os.path.join(thread_dir,'thread_5.png'), cv2.IMREAD_UNCHANGED)
-    # thread7 = cv2.imread(os.path.join(thread_dir,'thread_7.png'), cv2.IMREAD_UNCHANGED)
-    # thread8 = cv2.imread(os.path.join(thread_dir,'thread_8.png'), cv2.IMREAD_UNCHANGED)
-    # thread10 = cv2.imread(os.path.join(thread_dir,'thread_10.png'), cv2.IMREAD_UNCHANGED)
+    # load threads & masks (you can also glob the folder to avoid hardcoding)
+    thread0 = cv2.imread(os.path.join(thread_dir,'thread_1.png'), cv2.IMREAD_UNCHANGED)
+    thread1 = cv2.imread(os.path.join(thread_dir,'thread_5.png'), cv2.IMREAD_UNCHANGED)
+    thread2 = cv2.imread(os.path.join(thread_dir,'thread_8.png'), cv2.IMREAD_UNCHANGED)
+    thread3 = cv2.imread(os.path.join(thread_dir,'thread_9.png'), cv2.IMREAD_UNCHANGED)
+    mask0 = np.array(Image.open(os.path.join(thread_dir,'thread_1_mask.jpg')))
+    mask1 = np.array(Image.open(os.path.join(thread_dir,'thread_5_mask.jpg')))
+    mask2 = np.array(Image.open(os.path.join(thread_dir,'thread_8_mask.jpg')))
+    mask3 = np.array(Image.open(os.path.join(thread_dir,'thread_9_mask.jpg')))
 
-
-    # #Load masks
-    # mask2 = np.array(Image.open(os.path.join(thread_dir,'thread_2_mask.jpg')))
-    # mask4 = np.array(Image.open(os.path.join(thread_dir,'thread_4_mask.jpg')))
-    # mask5 = np.array(Image.open(os.path.join(thread_dir,'thread_5_mask.jpg')))
-    # mask7 = np.array(Image.open(os.path.join(thread_dir,'thread_7_mask.jpg')))
-    # mask8 = np.array(Image.open(os.path.join(thread_dir,'thread_8_mask.jpg')))
-    # mask10 = np.array(Image.open(os.path.join(thread_dir,'thread_10_mask.jpg')))
-    
-
-    masks = [mask0, mask1]#, mask3, mask4, mask5, mask6, mask7, mask8, mask9, mask10]
-    threads = [thread0, thread1]#, thread3, thread4, thread5, thread6, thread7, thread8, thread9, thread10]
+    masks = [mask0, mask1, mask2, mask3]
+    threads = [thread0, thread1, thread2, thread3]
 
     image = cv2.imread(image_path)
+    h, w = image.shape[:2]
+
+    # resize all threads/masks to the image size — note cv2.resize takes (width, height)
     for i in range(len(threads)):
-        temp = cv2.resize(threads[i], (image.shape[0],image.shape[1]), interpolation=cv2.INTER_AREA)
-        threads[i] = temp
-        temp = cv2.resize(masks[i], (image.shape[0],image.shape[1]), interpolation=cv2.INTER_AREA)
-        masks[i] = temp
+        threads[i] = cv2.resize(threads[i], (w, h), interpolation=cv2.INTER_AREA)
+        masks[i] = cv2.resize(masks[i], (w, h), interpolation=cv2.INTER_AREA)
+    # pick two distinct indices
+    idx1, idx2 = random.sample(range(len(threads)), 2)
 
-    # i = randint (0, 9)
-        
-    image_over_1 = transparentOverlay(image,threads[0],(0,0),1)
-    image_over_2 = transparentOverlay(image,threads[1],(0,0),1)
-    
-    image_blur1 = cv2.GaussianBlur(image_over_1, (5, 5), 0)
-    image_blur2 = cv2.GaussianBlur(image_over_2, (5, 5), 0)
+    # first output
+    image_over_1 = transparentOverlay(image, threads[idx1], (0,0), 1)
+    image_blur1   = cv2.GaussianBlur(image_over_1, (5,5), 0)
+    image_out1    = np.where(masks[idx1]==(0,0,0), image_over_1, image_blur1)
+    cv2.imwrite(os.path.join(dest, "thread", f"{im_name}_{size}_thread_1.jpg"), image_out1, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-    # (0,0,0) is 3 dimensions of numpy and for every dimension 0 is threshold to be masked
-    image_out1 = np.where(masks[0]==(0, 0, 0), image_over_1, image_blur1)
-    image_out2 = np.where(masks[1]==(0, 0, 0), image_over_2, image_blur2)
-    
-    cv2.imwrite(os.path.join(dest, "thread/"+im_name +f"_{size}_threaded_1"+".jpg"), image_out1, [cv2.IMWRITE_JPEG_QUALITY, 80])
-    cv2.imwrite(os.path.join(dest, "thread/"+im_name +f"_{size}_threaded_2"+".jpg"), image_out2, [cv2.IMWRITE_JPEG_QUALITY, 80])
-        
-# threader(image_path, im_name, "small")
-# threader(image_path, im_name, "large")
+    # second output
+    image_over_2 = transparentOverlay(image, threads[idx2], (0,0), 1)
+    image_blur2   = cv2.GaussianBlur(image_over_2, (5,5), 0)
+    image_out2    = np.where(masks[idx2]==(0,0,0), image_over_2, image_blur2)
+    cv2.imwrite(os.path.join(dest, "thread", f"{im_name}_{size}_thread_2.jpg"), image_out2, [cv2.IMWRITE_JPEG_QUALITY, 80])

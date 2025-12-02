@@ -66,3 +66,13 @@ bash zero_shot.sh
    | GasHisSDB    | [View Dataset](https://gitee.com/neuhwm/GasHisSDB#https://gitee.com/link?target=https%3A%2F%2Fdoi.org%2F10.6084%2Fm9.figshare.15066147.v1) | [Read Paper](-)  |
    | PCam    | [View Dataset]() | [Read Paper]()  |
 
+## Current models included in the evaluation
+| Model | Model | Paper Link |
+   |--------------|--------------|------------|
+   | PLIP    | [Model](https://github.com/PathologyFoundation/plip) | [Paper](https://www.nature.com/articles/s41591-023-02504-3)|
+   | QuiltNet    | [Model](https://huggingface.co/wisdomik/QuiltNet-B-32) | [Paper](https://arxiv.org/abs/2306.11207) |
+   | BiomedCLIP    | [Model](https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224) | [Paper](https://arxiv.org/abs/2303.00915)|
+   | Mi-Zero    | [Model](https://drive.google.com/drive/folders/1AR9agw2WLXes5wz26UTlT_mvJoUY38mQ) | [Paper](https://arxiv.org/abs/2306.07831) |
+   | CONCH    | [Model](https://huggingface.co/MahmoodLab/CONCH) | [Paper](https://www.nature.com/articles/s41591-024-02856-4) |
+   | KEEP    | [Model](https://huggingface.co/Astaxanthin/KEEP) | [Paper](https://arxiv.org/abs/2412.13126) |
+   | PathCLIP    | [Model](https://huggingface.co/jamessyx/pathclip) | [Paper](https://arxiv.org/abs/2305.15072) |

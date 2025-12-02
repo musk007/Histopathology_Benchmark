@@ -30,7 +30,7 @@ def config():
     parser.add_argument("--num-workers", default=1, type=int)
     parser.add_argument("--seed", default=1, type=int)
     parser.add_argument("--finetune_test", default=False, type=bool)
-    parser.add_argument("--ensemble", default=False, type=bool)
+    parser.add_argument("--ensemble", default=True, type=bool)
 
     parser.add_argument("--adversarial", default=False, type=bool)
     parser.add_argument("--text_error", default='remove', type=str)   # options include remove,replace,swap

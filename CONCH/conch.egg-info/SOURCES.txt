@@ -17,9 +17,12 @@ conch/open_clip_custom/coca_model.py
 conch/open_clip_custom/constants.py
 conch/open_clip_custom/custom_tokenizer.py
 conch/open_clip_custom/factory.py
+conch/open_clip_custom/factory_updated.py
 conch/open_clip_custom/transform.py
 conch/open_clip_custom/transformer.py
 conch/open_clip_custom/utils.py
 conch/open_clip_custom/vision_tower.py
+conch/open_clip_custom/model_configs/UNI_ViT-L-16.json
 conch/open_clip_custom/model_configs/conch_ViT-B-16.json
+conch/open_clip_custom/model_configs/conch_ViT-L-16.json
 conch/open_clip_custom/tokenizers/conch_byte_level_bpe_uncased.json

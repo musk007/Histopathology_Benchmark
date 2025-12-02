@@ -2,9 +2,9 @@ import sys, os, platform, copy
 from _dataset_loader import (
                             process_PanNuke,
                             # process_DigestPath,
-                            # process_WSSS4LUAD_binary,
+                            process_WSSS4LUAD_binary,
                             # process_KIMIA_Path24,
-                            # process_Kather_csv,
+                            process_Kather_csv,
                             )
 import warnings
 warnings.filterwarnings("ignore")
@@ -68,52 +68,52 @@ if __name__ == '__main__':
     seed=1
     train_ratio=0.7
     # '/l/users/roba.majzoub/plip_data/PanNuke
-    img_savedir = '/l/users/roba.majzoub/plip_data/data_validation_images_resize=224'
-    savedir = opj('//l/users/roba.majzoub/plip_data/evaluation_datasets', 'trainratio=%.2f_size=224' % (train_ratio))
+    img_savedir = '/home/roba/benchmark_req/data/data_validation_images_resize=224'
+    savedir = opj('/home/roba/benchmark_req/data/evaluation_datasets', 'trainratio=%.2f_size=224' % (train_ratio))
     os.makedirs(img_savedir, exist_ok=True)
     os.makedirs(savedir, exist_ok=True)
 
-    root_dir = '/l/users/roba.majzoub/plip_data/'
+    root_dir = '/home/roba/benchmark_req/data/'
 
-    # #############################################
-    # #    Kather (9 classes)
-    # #############################################
-
-    # print('Processing Kather dataset ...')
-    # # test = process_Kather_csv(root_dir)
-    # train, test = process_Kather_csv(root_dir)
-    # this_savedir_train = opj(img_savedir, 'Kather', 'train')
-    # this_savedir_test = opj(img_savedir, 'Kather', 'test')
-    # os.makedirs(this_savedir_train, exist_ok=True)
-    # os.makedirs(this_savedir_test, exist_ok=True)
-
-    # pbar = tqdm(total=int(len(train)))
-    # new_image_paths = parmap(lambda fp: resizeimg(fp, this_savedir_train), X = train['image'])
-    # train['image'] = new_image_paths
-    # pbar = tqdm(total=int(len(test)))
-    # new_image_paths = parmap(lambda fp: resizeimg(fp, this_savedir_test), X = test['image'])
-    # test['image'] = new_image_paths
-    # train.to_csv(opj(savedir, 'Kather_train.csv'))
-    # test.to_csv(opj(savedir, 'Kather_test.csv'))
-    
     #############################################
-    #    PanNuke
+    #    Kather (9 classes)
     #############################################
-    print('Processing PanNuke (normal, abnormal) dataset ...')
-    train, test = process_PanNuke(root_dir, seed=seed, train_ratio=train_ratio)
-    this_savedir_train = opj(img_savedir, 'PanNuke', 'train')
-    this_savedir_test = opj(img_savedir, 'PanNuke', 'test')
+
+    print('Processing Kather dataset ...')
+    # test = process_Kather_csv(root_dir)
+    train, test = process_Kather_csv(root_dir)
+    this_savedir_train = opj(img_savedir, 'Kather', 'train')
+    this_savedir_test = opj(img_savedir, 'Kather', 'test')
     os.makedirs(this_savedir_train, exist_ok=True)
     os.makedirs(this_savedir_test, exist_ok=True)
-    
+
     pbar = tqdm(total=int(len(train)))
     new_image_paths = parmap(lambda fp: resizeimg(fp, this_savedir_train), X = train['image'])
     train['image'] = new_image_paths
     pbar = tqdm(total=int(len(test)))
     new_image_paths = parmap(lambda fp: resizeimg(fp, this_savedir_test), X = test['image'])
     test['image'] = new_image_paths
-    train.to_csv(opj(savedir, 'PanNuke_train.csv'))
-    test.to_csv(opj(savedir, 'PanNuke_test.csv'))
+    train.to_csv(opj(savedir, 'Kather_train.csv'))
+    test.to_csv(opj(savedir, 'Kather_test.csv'))
+    
+    # #############################################
+    # #    PanNuke
+    # #############################################
+    # print('Processing PanNuke (normal, abnormal) dataset ...')
+    # train, test = process_PanNuke(root_dir, seed=seed, train_ratio=train_ratio)
+    # this_savedir_train = opj(img_savedir, 'PanNuke', 'train')
+    # this_savedir_test = opj(img_savedir, 'PanNuke', 'test')
+    # os.makedirs(this_savedir_train, exist_ok=True)
+    # os.makedirs(this_savedir_test, exist_ok=True)
+    
+    # pbar = tqdm(total=int(len(train)))
+    # new_image_paths = parmap(lambda fp: resizeimg(fp, this_savedir_train), X = train['image'])
+    # train['image'] = new_image_paths
+    # pbar = tqdm(total=int(len(test)))
+    # new_image_paths = parmap(lambda fp: resizeimg(fp, this_savedir_test), X = test['image'])
+    # test['image'] = new_image_paths
+    # train.to_csv(opj(savedir, 'PanNuke_train.csv'))
+    # test.to_csv(opj(savedir, 'PanNuke_test.csv'))
     
     # # #############################################
     # # #    DigestPath2019 (binary)

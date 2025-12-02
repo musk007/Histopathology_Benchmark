@@ -54,6 +54,9 @@ class PLIP:
 
     def encode_text(self, text: List[str], batch_size: int):
         dataset = Dataset.from_dict({'text': text})
+        print("*"*20)
+        print(text[:5])
+        print("*"*20)
         dataset = dataset.map(lambda el: self.preprocess(text=el['text'], return_tensors="pt",
                                                          max_length=77, padding="max_length", truncation=True),
                               batched=True,

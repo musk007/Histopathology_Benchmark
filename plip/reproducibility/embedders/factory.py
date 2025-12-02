@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/Histopathology_Benchmark/plip')
+sys.path.insert(1, '/home/roba/Histopathology_Benchmark/plip')
 import torch
 import clip
 from reproducibility.embedders.plip import CLIPEmbedder
@@ -11,12 +11,24 @@ import os
 from plip import PLIP
 import open_clip
 from open_clip import create_model_from_pretrained, get_tokenizer # works on open-clip-torch>=2.23.0, timm>=0.9.8
-from src.models.factory import create_model 
+from src.models.factory import create_model as miZero_create_model
 import torch.nn as nn
 import pandas as pd
-
-import conch.open_clip_custom as concher
+import numpy as np
+import CONCH.conch.open_clip_custom as concher
 import timm
+from timm.models import create_model
+
+from CPLIP.models.factory import create_model_and_transforms
+from safetensors.torch import load_file as load_sf  # use if you have .safetensors
+
+from transformers import AutoModel
+from timm.data.constants import IMAGENET_INCEPTION_MEAN, IMAGENET_INCEPTION_STD
+
+
+
+# allow-list the offending global (do this once at startup, before torch.load)
+torch.serialization.add_safe_globals([np.core.multiarray.scalar])
 
 
 
@@ -40,7 +52,7 @@ class EmbedderFactory:
     def __init__(self):
         pass
     
-    def factory(self, args):
+    def factory(self, args, num_classes):
         
         name = args.model_name
         path = args.backbone
@@ -108,9 +120,9 @@ class EmbedderFactory:
 
             if adverse:
 
-                return AdverseCLIPEmbedder(model, preprocess_val, name, path, ensemble, device, batch_size, num_workers)
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
             else:
-                return CLIPEmbedder(model, preprocess_val, name, path, ensemble, text_error)
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
 
         
         elif name == "biomedclip":
@@ -130,7 +142,7 @@ class EmbedderFactory:
 
         
         elif name == "conch":
-            model, preprocess = concher.create_model_from_pretrained('conch_ViT-B-16', "/l/users/roba.majzoub/models/conch/pytorch_model.bin")
+            model, preprocess = concher.create_model_from_pretrained('conch_ViT-B-16', "/home/roba/benchmark_req/models/conch/pytorch_model.bin")
             
             
             
@@ -138,6 +150,44 @@ class EmbedderFactory:
             model.to(device)
             model.eval()
 
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
+
+        
+        
+        elif name == "pathclip":
+            model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-16', pretrained='/home/roba/benchmark_req/models/pathclip/pathclip/pathclip-base.pt',
+                                                       cache_dir='/home/roba/benchmark_req/models/pathclip/cache_dir', force_quick_gelu=True)
+            
+            model.to(device)
+            model.eval()
+
+            if adverse:
+                return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
+            else:
+
+                return CLIPEmbedder(model, preprocess, name, path, ensemble, text_error)
+        
+        
+
+        
+
+
+        
+        elif name == "keep":
+            model = AutoModel.from_pretrained("Astaxanthin/KEEP", trust_remote_code=True)
+            preprocess = transforms.Compose([
+                transforms.Resize(size=224, interpolation=transforms.InterpolationMode.BICUBIC),
+                transforms.CenterCrop(size=(224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+            ])
+
+            model.to(device)
+            model.eval()
             if adverse:
                 return AdverseCLIPEmbedder(model, preprocess, name, path, ensemble, device, batch_size, num_workers)
             else:
@@ -154,10 +204,8 @@ class EmbedderFactory:
                 encoder_name = "bioclinicalbert"
             elif text_encoder == "pubmedbert":
                 encoder_name = "pubmedbert"
-
             ### using bioclinicalbert
-            model_checkpoint = f"/l/users/roba.majzoub/models/MI-zero/ctranspath_448_{encoder_name}/checkpoints/epoch_50.pt"
-            img_size = 448
+            model_checkpoint = f"/home/roba/benchmark_req/models/MI-zero/ctranspath_448_{encoder_name}/checkpoints/epoch_50.pt"
             def clean_state_dict_ctranspath(state_dict):
                 new_state_dict = {}
                 for k, v in state_dict.items():
@@ -179,10 +227,10 @@ class EmbedderFactory:
                 return trnsfrms
 
             model_config = name
-            model = create_model(model_config, device=device, override_image_size=None)
+            model = miZero_create_model(model_config, device=device, override_image_size=None)
             if model_checkpoint is not None: # load PPTCLIP checkpoint if applicable
                 if os.path.exists(model_checkpoint):
-                    state_dict = torch.load(model_checkpoint, map_location='cpu')['state_dict']
+                    state_dict = torch.load(model_checkpoint, map_location='cpu', weights_only=False)['state_dict']
                     state_dict = clean_state_dict_ctranspath(state_dict)
                     missing_keys, _ = model.load_state_dict(state_dict, strict=False)
                     assert pd.Series(missing_keys).str.contains('attn_mask').all() # only modules with attn_mask are not loaded
@@ -191,7 +239,7 @@ class EmbedderFactory:
                     print(f'Cannot find model checkpoint {model_checkpoint}')
                     return 1
             
-            preprocess = get_transforms_ctranspath(img_size = img_size)
+            preprocess = get_transforms_ctranspath(img_size = 448)
             model.to(device)
             model.eval()
                 

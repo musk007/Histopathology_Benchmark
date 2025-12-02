@@ -31,14 +31,14 @@ class ZeroShotClassifier:
         
         ## creating designated folder for the results
         if mode == 'ensemble':
-            folder_path = f"/home/roba.majzoub/Histopathology_Benchmark/plip/ensemble/{test_ds_name}/"
+            folder_path = f"/home/roba/Histopathology_Benchmark/plip/ensemble/{test_ds_name}/"
             
         else:
 
-            folder_path = f"/home/roba.majzoub/Histopathology_Benchmark/plip/results/{test_ds_name}/"
+            folder_path = f"/home/roba/Histopathology_Benchmark/plip/results/{test_ds_name}/"
 
         if adversarial:
-            folder_path = f"/home/roba.majzoub/Histopathology_Benchmark/plip/advers_results/{test_ds_name}/"
+            folder_path = f"/home/roba/Histopathology_Benchmark/plip/advers_results/{test_ds_name}/"
         os.makedirs(folder_path, exist_ok=True)
 
 
@@ -60,7 +60,7 @@ class ZeroShotClassifier:
         if adversarial:
             plt.savefig(os.path.join(folder_path,f"confusion_matrix_{model_name}_adverse_8.png"), bbox_inches='tight', pad_inches=0)
         else:
-            print("In the correct path for errors")    
+            # print("In the correct path for errors")    
             plt.savefig(os.path.join(folder_path,f"confusion_matrix_{model_name}_{text_error}_3.png"), bbox_inches='tight', pad_inches=0)
             # plt.savefig(os.path.join(folder_path,f"confusion_matrix_{model_name}_{text_error}_3.png"), bbox_inches='tight', pad_inches=0)
         plt.close()

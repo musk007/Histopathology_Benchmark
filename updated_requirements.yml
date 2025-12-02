@@ -1,7 +1,7 @@
 name: benchmark
-python: 3.11.4
+python: 3.13
 depndencies:
-  - conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 pytorch-cuda=12.1 -c pytorch -c nvidia
+  - pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
   - pip install openai-clip
   - pip install open-clip-torch
   - pip install transformers
@@ -19,3 +19,8 @@ depndencies:
   - pip install monai
   - pip install staintools
   - conda install conda-forge::python-spams
+  ##################### requirements for musk
+  - git clone https://github.com/lilab-stanford/MUSK.git
+  - cd MUSK/ then pip install -e .
+  - pip install einops
+  - pip install fairscale

@@ -13,7 +13,7 @@ from .model import CLIP
 from src.misc.transforms import create_transforms
 from src.misc.constants import IMAGENET_COLOR_MEAN, IMAGENET_COLOR_STD
 
-_MODEL_CONFIG_PATHS = [Path("/l/users/roba.majzoub/models/MI-zero") / f"model_configs/"]
+_MODEL_CONFIG_PATHS = [Path("/home/roba/benchmark_req/models/MI-zero") / f"model_configs/"]
 # _MODEL_CONFIG_PATHS = [Path(__file__).parent.parent / f"model_configs/"]
 _MODEL_CONFIGS = {}  # directory (model_name: config) of model architecture configs
 

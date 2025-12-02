@@ -1,4 +1,5 @@
 import sys
+sys.path.insert(1, '/home/roba/Histopathology_Benchmark')
 
 import clip
 import tqdm
@@ -14,7 +15,7 @@ import torch.nn as nn
 from src.zeroshot_utils import zeroshot_path
 from transformers import AutoTokenizer
 import torch.nn.functional as F
-import conch.open_clip_custom as concher
+import CONCH.conch.open_clip_custom as concher
 # from conch.open_clip_custom import create_model_from_pretrained, tokenize, get_tokenizer
 
 
@@ -95,7 +96,7 @@ class AdversarialAttack:
 
         # Normalize the image to [0, 1]
         image = (image - min_val) / (max_val - min_val)
-        print(f"Image values: {image.min()} , {image.max()}")
+        # print(f"Image values: {image.min()} , {image.max()}")
 
         images = image.clone().detach().to(self.device)
         orig_images = image.clone().detach().to(self.device)
@@ -114,7 +115,7 @@ class AdversarialAttack:
         # Calculate loss
         cost = -nn.functional.cosine_similarity(orig_output, outputs)
         
-        print(f"Original loss ... {cost}")
+        # print(f"Original loss ... {cost}")
         # Update adversarial images
         grad = torch.autograd.grad(
             cost, adv_images, retain_graph=False, create_graph=False
@@ -124,7 +125,7 @@ class AdversarialAttack:
         delta = torch.clamp(adv_images - images, min=-self.epsilon, max=self.epsilon)
         adv_images = torch.clamp(images + delta, min=0, max=1).detach()
         new_cost = -nn.functional.cosine_similarity(orig_output, self.model.forward(adv_images))
-        print(f"Loss after the perturbations ... {new_cost}")
+        # print(f"Loss after the perturbations ... {new_cost}")
 
         
 
@@ -168,7 +169,8 @@ class AdverseCLIPEmbedder(nn.Module):
             return hit
 
     def embed_images(self, list_of_images, device="cuda", num_workers=1, batch_size=32):
-        attack = AdversarialAttack(self, epsilon=0.3, device=device)
+        # Pass epsilon as input-space "in 255", e.g., 8 for 8/255
+        attack = AdversarialAttack(self, epsilon=51, device=device)
 
         train_dataset = CLIPImageDataset(list_of_images, self.preprocess)
         dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers)
@@ -212,7 +214,13 @@ class AdverseCLIPEmbedder(nn.Module):
         
         elif "conch" in self.name:
             image_embeddings = self.model.encode_image(image) # for mi-zero
-    
+        
+        elif "keep" in self.name:
+            image_embeddings = self.model.encode_image(image) # for keep
+        
+        elif "pathclip" in self.name:
+            image_embeddings = self.model.encode_image(image) # for pathclip
+
         return image_embeddings
     
     
@@ -437,8 +445,21 @@ class AdverseCLIPEmbedder(nn.Module):
                         tokenizer = concher.get_tokenizer()
                         tokenized_prompts = concher.tokenize(texts=captions, tokenizer=tokenizer).to(device)
                         text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
+
+                       
+                    elif self.name == "pathclip":
+
+                        tokenizer = open_clip.get_tokenizer('ViT-B-16')
+                        tokenized_prompts = tokenizer(texts=captions).to(device)
+                        text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
+
+
+                    elif "keep" in self.name:
+
+                        tokenizer = AutoTokenizer.from_pretrained("Astaxanthin/KEEP", trust_remote_code=True)
+                        tokenized_prompts = tokenizer(captions, max_length=256,padding='max_length',truncation=True, return_tensors='pt').to(device)
+                        text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())    
                         
-                        # text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy())
                     pbar.update(1)
 
                 pbar.close()
@@ -446,5 +467,4 @@ class AdverseCLIPEmbedder(nn.Module):
         text_embeddings = text_embeddings / np.linalg.norm(text_embeddings, axis=1, keepdims=True)
 
         return text_embeddings
-
 

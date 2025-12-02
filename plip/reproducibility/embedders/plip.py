@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(1, '/home/roba.majzoub/Histopathology_Benchmark')
+sys.path.insert(1, '/home/roba/Histopathology_Benchmark')
 import clip
 import tqdm
 import numpy as np
@@ -11,9 +11,10 @@ import open_clip
 from open_clip import get_tokenizer
 
 from src.zeroshot_utils import zeroshot_path
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, XLMRobertaTokenizer
 import torch.nn.functional as F
 import CONCH.conch.open_clip_custom as concher
+from tokenizers import Tokenizer
 
 class CLIPEmbedder:
 
@@ -69,8 +70,17 @@ class CLIPEmbedder:
                 elif "mi_zero" in self.name:
                     image_embeddings.extend(self.model.visual(images).detach().cpu().numpy()) # for mi-zero
                 
-                elif "conch" in self.name:
-                    image_embeddings.extend(self.model.encode_image(images).detach().cpu().numpy()) # for mi-zero
+                elif self.name == "conch":
+                    image_embeddings.extend(self.model.encode_image(images).detach().cpu().numpy()) # for conch
+                
+                elif self.name == "pathclip":
+                    image_embeddings.extend(self.model.encode_image(images).detach().cpu().numpy()) # for conch
+
+                elif self.name == "keep":
+                    image_embeddings.extend(self.model.encode_image(images).detach().cpu().numpy()) # for KEEP                
+
+                            
+
                 
                 pbar.update(1)
             pbar.close()
@@ -121,7 +131,9 @@ class CLIPEmbedder:
 
                     ##### Introducing text errorrs in ensemble mode
                     if self.text_error in ["swap","replace","remove"]:
+                        print("\n************************")
                         print("Introducing text errorrs in ensemble mode.......")
+                        print("************************")
                         for i in range(len(templates)):
                             templates[i] = self.introduce_errors(list(templates[i]),3,[text_error])
                 
@@ -142,6 +154,45 @@ class CLIPEmbedder:
                                 zeroshot_weights.append(class_embedding.detach().cpu().numpy())
                         text_embeddings.extend(zeroshot_weights) # for clip
 
+
+                
+                    if self.name == "pathclip":
+                        for caption in captions:
+                            clss = caption.split("An H&E image patch of ")[-1].split(" tissue")[0]
+                            zeroshot_weights = []
+                            tokenizer = open_clip.get_tokenizer('ViT-B-16')
+                            for classnames_for_class in classnames.keys():
+                                embeddings_for_class = []
+                                for classname in classnames[classnames_for_class]:
+                                    texts = [template.replace("CLASSNAME", classname) for template in templates]
+                                    token_ids = tokenizer(texts=texts).to(device) # Tokenize with custom tokenizer
+                                    classname_embeddings = self.model.encode_text(token_ids) # for clip
+                                    embeddings_for_class.append(F.normalize(classname_embeddings, dim=-1))
+                                class_embedding = torch.stack(embeddings_for_class, dim=0)
+                                class_embedding = class_embedding.mean(dim=(0, 1))
+                                class_embedding /= class_embedding.norm()
+                                zeroshot_weights.append(class_embedding.detach().cpu().numpy())
+                        text_embeddings.extend(zeroshot_weights) # for clip
+
+
+                
+                    if self.name == "keep":
+                        for caption in captions:
+                            clss = caption.split("An H&E image patch of ")[-1].split(" tissue")[0]
+                            zeroshot_weights = []
+                            tokenizer = AutoTokenizer.from_pretrained("Astaxanthin/KEEP", trust_remote_code=True)
+                            for classnames_for_class in classnames.keys():
+                                embeddings_for_class = []
+                                for classname in classnames[classnames_for_class]:
+                                    texts = [template.replace("CLASSNAME", classname) for template in templates]
+                                    token_ids = tokenizer(texts, max_length=256,padding='max_length',truncation=True, return_tensors='pt').to(device) # Tokenize with custom tokenizer
+                                    classname_embeddings = self.model.encode_text(token_ids) # for clip
+                                    embeddings_for_class.append(F.normalize(classname_embeddings, dim=-1))
+                                class_embedding = torch.stack(embeddings_for_class, dim=0)
+                                class_embedding = class_embedding.mean(dim=(0, 1))
+                                class_embedding /= class_embedding.norm()
+                                zeroshot_weights.append(class_embedding.detach().cpu().numpy())
+                        text_embeddings.extend(zeroshot_weights) # for clip
 
 
 
@@ -270,7 +321,9 @@ class CLIPEmbedder:
                 if self.ensemble == False:
                     #### Introducing text errorrs in single caption mode
                     if self.text_error in ["swap","replace","remove"]:
+                        print("************************")
                         print(f"Introducing {text_error} in single caption mode ........")
+                        print("************************")
                         for i in range(len(captions)):
                             captions[i] = self.introduce_errors(list(captions[i]),3,[text_error])
                     if self.name == "quilt":
@@ -280,13 +333,13 @@ class CLIPEmbedder:
                         text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy()) # for quilt
                     elif self.name == "clip":
                         idx = clip.tokenize(captions, truncate=True).to(device)
-                
-
                         text_embeddings.extend(self.model.encode_text(idx).detach().cpu().numpy()) # for clip
                             
-                    elif self.name == "plip":
-                        idx = clip.tokenize(captions, truncate=True).to(device)
+                    elif self.name  == "plip":
+                        idx = clip.tokenize(captions, truncate=True).to(device) # idx here is a tensor
                         text_embeddings.extend(self.model.model.get_text_features(idx).detach().cpu().numpy()) # for plip
+                            
+                    
                     
                     elif self.name == "biomedclip":
                         tokenizer = get_tokenizer('hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224')
@@ -326,17 +379,28 @@ class CLIPEmbedder:
                         attention_mask = torch.from_numpy(np.array(attention_mask)).to(device)
                         class_embeddings = self.model.encode_text(texts, attention_mask=attention_mask)
 
-                     
-
-                    
                         text_embeddings.extend(class_embeddings.detach().cpu().numpy())
 
-                    elif "conch" in self.name:
+                    elif self.name == "conch":
 
                         tokenizer = concher.get_tokenizer()
                         tokenized_prompts = concher.tokenize(texts=captions, tokenizer=tokenizer).to(device)
                         text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
                         
+                    elif self.name == "pathclip":
+
+                        tokenizer = open_clip.get_tokenizer('ViT-B-16')
+                        tokenized_prompts = tokenizer(texts=captions).to(device)
+                        text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
+                        
+
+                    elif "keep" in self.name:
+
+                        tokenizer = AutoTokenizer.from_pretrained("Astaxanthin/KEEP", trust_remote_code=True)
+                        tokenized_prompts = tokenizer(captions, max_length=256,padding='max_length',truncation=True, return_tensors='pt').to(device)
+                        text_embeddings.extend(self.model.encode_text(tokenized_prompts).detach().cpu().numpy())
+                        
+
 
 
                     pbar.update(1)
